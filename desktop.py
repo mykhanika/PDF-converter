@@ -15,6 +15,13 @@ if (BASE / "tesseract" / "tessdata").exists():  # optional bundled Tesseract
 
 import app as toolkit  # noqa: E402  (after PATH is prepared)
 
+# "Open with PDF Toolkit": Windows passes the file path as an argument.
+FILES = [os.path.abspath(a) for a in sys.argv[1:] if a.lower().endswith(".pdf") and os.path.isfile(a)]
+if FILES: toolkit.STARTUP.append(FILES[0])
+for extra_file in FILES[1:]:  # several files selected: one window each
+    import subprocess
+    subprocess.Popen([sys.executable, extra_file] if getattr(sys, "frozen", False) else [sys.executable, __file__, extra_file])
+
 def free_port():
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0)); return s.getsockname()[1]

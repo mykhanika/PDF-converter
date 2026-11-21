@@ -64,7 +64,7 @@ async function exp(a,x={},nm='file'){await commit();const fd=new FormData();fd.a
 /* ---------- open / merge / convert ---------- */
 async function openFile(f,pw){const fd=new FormData();fd.append('file',f);if(pw)fd.append('password',pw);const j=await call('/api/open',fd);if(!j)return;
  if(j.needs_password){const r=await dlg('🔒 Password required','<input type="password" name="p" placeholder="Document password" required>','Unlock');return r&&openFile(f,r.d.p)}
- S.ops=[];S.meas=[];adopt(j);zoom('w');tab('View')}
+ S.ops=[];S.meas=[];adopt(j);tab('View');zoom('w')}
 const pick=()=>$('#fin').click();$('#fin').onchange=e=>{e.target.files[0]&&openFile(e.target.files[0]);e.target.value=''};
 addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];f&&/\.pdf$/i.test(f.name)&&openFile(f)});
 async function mergeDlg(){let files=[];await commit();
@@ -73,9 +73,9 @@ async function mergeDlg(){let files=[];await commit();
    b[0].onclick=()=>{if(i){[files[i-1],files[i]]=[files[i],files[i-1]];draw()}};b[1].onclick=()=>{if(i<files.length-1){[files[i+1],files[i]]=[files[i],files[i+1]];draw()}};b[2].onclick=()=>{files.splice(i,1);draw()};l.append(d)})};
   f.querySelector('#mf').onchange=e=>{files.push(...e.target.files);e.target.value='';draw()}});
  if(!r)return;if(!files.length&&!(S.id&&r.d.cur))return toast('Add at least one PDF.',1);
- const fd=new FormData();if(S.id&&r.d.cur)fd.append('id',S.id);files.forEach(x=>fd.append('files',x));const j=await call('/api/merge',fd);if(j){S.ops=[];adopt(j);zoom('w');tab('View')}}
+ const fd=new FormData();if(S.id&&r.d.cur)fd.append('id',S.id);files.forEach(x=>fd.append('files',x));const j=await call('/api/merge',fd);if(j){S.ops=[];adopt(j);tab('View');zoom('w')}}
 async function toPdfDlg(){const r=await dlg('📥 Create PDF from files','<p>Word, Excel, PowerPoint, text and images. Several files are merged into one PDF.</p><input type="file" name="files" multiple required>','Convert');
- if(!r)return;const j=await call('/api/to-pdf',r.fd);if(j){S.ops=[];adopt(j);zoom('w');tab('View')}}
+ if(!r)return;const j=await call('/api/to-pdf',r.fd);if(j){S.ops=[];adopt(j);tab('View');zoom('w')}}
 /* ---------- viewer ---------- */
 function load(){if(!S.id)return;S.el=new Image();S.el.onload=()=>{pv.width=S.el.width;pv.height=S.el.height;draw()};S.el.src=`/api/preview/${S.id}/${S.pg}?z=${S.Z.toFixed(3)}&v=${S.ver}`;$('#pi').textContent=`Page ${S.pg} / ${S.pages}  ·  ${Math.round(S.Z*75)}%`}
 function go(n){if(S.id&&n>=1&&n<=S.pages){S.pg=n;load()}}
@@ -207,5 +207,9 @@ $('#home').innerHTML=`<div class="hero"><h2>Everything you need for PDFs</h2><p>
  TILES.map(([t,x],i)=>`<div class="hg">${t}</div><div class="tiles">${x.map((k,j)=>`<button class="tile" data-k="${i}-${j}" style="background:linear-gradient(135deg,${k[0].split(',')[0]},${k[0].split(',')[1]})"><i>${k[1]}</i><b>${k[2]}</b><small>${k[3]}</small></button>`).join('')}</div>`).join('');
 $('#hb1').onclick=pick;$('#hb2').onclick=mergeDlg;document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{const[i,j]=b.dataset.k.split('-');TILES[i][1][j][4]()});
 tab('Home');
+async function startup(pw){const fd=new FormData();if(pw)fd.append('password',pw);let j;try{j=await (await fetch('/api/startup',{method:'POST',body:fd})).json()}catch(e){return}
+ if(j.needs_password){const r=await dlg('🔒 Password required','<input type="password" name="p" placeholder="Document password" required>','Unlock');return r&&startup(r.d.p)}
+ if(j.id){S.meas=[];adopt(j);tab('View');zoom('w')}}
+startup();
 if('serviceWorker' in navigator&&(location.protocol=='https:'||location.hostname=='localhost'))navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script></body></html>

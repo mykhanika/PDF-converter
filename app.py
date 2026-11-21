@@ -19,6 +19,7 @@ DL = {}
 HIST = {}  # per-session undo/redo (document versions)
 NAMES = {}
 IMG = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".webp"}
+STARTUP = []  # PDF paths given on the command line (set by desktop.py only)
 UI = (BASE / "ui.html").read_text(encoding="utf-8")
 
 @app.errorhandler(Exception)
@@ -111,6 +112,13 @@ def open_():
     doc = fitz.open(stream=f.read(), filetype="pdf")
     if doc.needs_pass and not doc.authenticate(request.form.get("password", "")): return jsonify(needs_password=True)
     return info(session(doc, Path(f.filename).stem), doc)
+
+@app.post("/api/startup")
+def startup():
+    if not STARTUP: return jsonify(none=True)
+    doc = fitz.open(STARTUP[0])
+    if doc.needs_pass and not doc.authenticate(request.form.get("password", "")): return jsonify(needs_password=True)
+    return info(session(doc, Path(STARTUP.pop(0)).stem), doc)
 
 @app.post("/api/merge")
 def merge():
