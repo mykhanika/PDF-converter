@@ -1,0 +1,7 @@
+services:
+  pdftoolkit:
+    build: .
+    ports: ["5000:5000"]
+    environment:
+      PDFTK_KEY: "${PDFTK_KEY:?set PDFTK_KEY to a long random string}"
+    restart: unless-stopped
