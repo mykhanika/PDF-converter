@@ -71,7 +71,7 @@ def load(pid):
     return fitz.open(stream=p.read_bytes(), filetype="pdf")
 def store(pid, doc): path(pid).write_bytes(doc.tobytes(garbage=1, deflate=True, encryption=fitz.PDF_ENCRYPT_NONE))
 def session(doc, name):
-    pid = uuid.uuid4().hex; NAMES[pid] = name; store(pid, doc); return pid
+    pid = uuid.uuid4().hex; NAMES[pid] = name; store(pid, bake_rotation(doc)); return pid
 def push_hist(pid):
     h = HIST.setdefault(pid, {"u": [], "r": []}); h["u"].append(path(pid).read_bytes()); del h["u"][:-10]; h["r"].clear()
 def info(pid, doc, msg=None):
@@ -100,6 +100,88 @@ def raster(doc, mode="none", dpi=150):
             im = page_img(p, dpi).convert("L").point(lambda v: 255 if v > 140 else 0).convert("1"); b = io.BytesIO(); im.save(b, "PNG"); pix = fitz.Pixmap(b.getvalue())
         np_ = new.new_page(width=p.rect.width, height=p.rect.height); np_.insert_image(np_.rect, pixmap=pix)
     return new
+
+# ---------- page setup + print layout ----------
+MM = 72 / 25.4
+PAPER = {"A3": (841.89, 1190.55), "A4": (595.28, 841.89), "A5": (419.53, 595.28), "Letter": (612, 792), "Legal": (612, 1008)}
+
+def bake_rotation(doc):
+    """Turn a page's /Rotate flag into real page geometry so every coordinate matches what the viewer shows."""
+    if not any(p.rotation for p in doc): return doc
+    new = fitz.open()
+    for i, p in enumerate(doc):
+        if not p.rotation: new.insert_pdf(doc, from_page=i, to_page=i)
+        else: np_ = new.new_page(-1, width=p.rect.width, height=p.rect.height); np_.show_pdf_page(np_.rect, doc, i, rotate=-p.rotation)
+    return new
+
+def pick(f, n, cur):
+    sc = f.get("scope", "all")
+    if sc == "current": return [min(max(cur, 1), n) - 1]
+    if sc == "custom":
+        idx = []
+        for part in filter(None, (x.strip() for x in f.get("arg", "").split(","))):
+            a, _, b = part.partition("-"); idx += list(range(max(1, int(a)) - 1, min(n, int(b or a))))
+        if not idx: abort(400, "Enter pages like 1-3,5.")
+        return idx
+    return list(range(n))
+
+def place(sheet, area, src, i, mode="fit", pct=100):
+    p = src[i]; sw, sh = p.rect.width, p.rect.height
+    sc = {"fit": min(area.width / sw, area.height / sh), "shrink": min(1, area.width / sw, area.height / sh), "actual": 1, "custom": pct / 100}[mode]
+    w, h = sw * sc, sh * sc; x = area.x0 + (area.width - w) / 2; y = area.y0 + (area.height - h) / 2
+    r = fitz.Rect(x, y, x + w, y + h); sheet.show_pdf_page(r, src, i, rotate=-p.rotation); return r
+
+def page_setup(doc, f, cur):
+    idx = set(pick(f, len(doc), cur)); new = fitz.open()
+    mt, mr, mb, ml = [float(f.get(k) or 0) * MM for k in ("mt", "mr", "mb", "ml")]; pct = float(f.get("pct") or 100)
+    for i, p in enumerate(doc):
+        if i not in idx: new.insert_pdf(doc, from_page=i, to_page=i); continue
+        sw, sh = p.rect.width, p.rect.height
+        if f.get("grow"): tw, th = sw + ml + mr, sh + mt + mb; area = fitz.Rect(ml, mt, ml + sw, mt + sh); mode = "actual"
+        else:
+            paper = f.get("paper", "keep")
+            tw, th = (float(f["w"]) * MM, float(f["h"]) * MM) if paper == "custom" else PAPER.get(paper, (sw, sh))
+            o = f.get("orient", "keep")
+            if o == "portrait": tw, th = min(tw, th), max(tw, th)
+            elif o == "landscape": tw, th = max(tw, th), min(tw, th)
+            area = fitz.Rect(ml, mt, tw - mr, th - mb); mode = f.get("scale", "fit")
+        if area.width < 10 or area.height < 10: abort(400, "Margins are larger than the page.")
+        place(new.new_page(-1, width=tw, height=th), area, doc, i, mode, pct)
+    return new
+
+def print_doc(doc, f, cur):
+    n = len(doc); idx = pick(f, n, cur); sub = f.get("subset", "all")
+    if sub == "odd": idx = [i for i in idx if i % 2 == 0]
+    elif sub == "even": idx = [i for i in idx if i % 2 == 1]
+    if f.get("reverse"): idx = idx[::-1]
+    if not idx: abort(400, "No pages match those print settings.")
+    per = f.get("per", "1"); booklet = per == "booklet"
+    if booklet:
+        m = -(-len(idx) // 4) * 4; order = []
+        for k in range(m // 4): order += [m - 1 - 2 * k, 2 * k, 2 * k + 1, m - 2 - 2 * k]
+        seq = [idx[o] if o < len(idx) else None for o in order]; cols, rows = 2, 1
+    else: cols, rows = {"1": (1, 1), "2": (2, 1), "4": (2, 2), "6": (3, 2), "9": (3, 3)}[per]; seq = idx
+    first = doc[idx[0]].rect; paper = f.get("paper", "original")
+    pw, ph = (first.width, first.height) if paper == "original" else PAPER[paper]
+    o = f.get("orient", "auto")
+    land = o == "landscape" or (o == "auto" and (booklet or per in ("2", "6") or (per in ("1", "4", "9") and first.width > first.height)))
+    pw, ph = (max(pw, ph), min(pw, ph)) if land else (min(pw, ph), max(pw, ph))
+    mg = {"none": 0, "narrow": 10, "normal": 20, "wide": 30}[f.get("margins", "narrow")] * MM
+    gap = 0 if cols * rows == 1 else 8
+    cw = (pw - 2 * mg - gap * (cols - 1)) / cols; ch = (ph - 2 * mg - gap * (rows - 1)) / rows
+    mode = f.get("scale", "fit") if cols * rows == 1 else "fit"; pct = float(f.get("pct") or 100)
+    sheets = -(-len(seq) // (cols * rows)); res = fitz.open()
+    for s in range(sheets):
+        sp = res.new_page(-1, width=pw, height=ph)
+        for c in range(cols * rows):
+            k = s * cols * rows + c
+            if k >= len(seq) or seq[k] is None: continue
+            rr, cc = divmod(c, cols); x, y = mg + cc * (cw + gap), mg + rr * (ch + gap)
+            r = place(sp, fitz.Rect(x, y, x + cw, y + ch), doc, seq[k], mode, pct)
+            if f.get("border"): sp.draw_rect(r, color=(.5, .5, .5), width=.5)
+        if f.get("numbers"): sp.insert_text((pw / 2 - 14, ph - 8), f"{s + 1} / {sheets}", fontsize=8, fontname="helv")
+    if f.get("color") in ("gray", "bw"): res = raster(res, f["color"], 200)
+    return res, pw, ph
 
 # ---------- open / merge / convert-to-pdf ----------
 @app.get("/")
@@ -192,12 +274,26 @@ def apply_ops(doc, ops):
 def apply():
     pid = request.form["id"]; doc = load(pid); apply_ops(doc, json.loads(request.form.get("ops", "[]"))); push_hist(pid); store(pid, doc); return info(pid, doc)
 
+# ---------- printing ----------
+@app.post("/api/print/prepare")
+def print_prepare():
+    f = request.form; res, pw, ph = print_doc(load(f["id"]), f, int(f.get("page", 1))); tok = uuid.uuid4().hex
+    res.save(WORK / f"pr_{tok}.pdf"); return jsonify(tok=tok, sheets=len(res), w_mm=round(pw / MM, 2), h_mm=round(ph / MM, 2))
+
+@app.get("/api/print/<tok>/<int:n>")
+def print_sheet(tok, n):
+    p = WORK / f"pr_{re.sub('[^0-9a-f]', '', tok)}.pdf"
+    if not p.exists(): abort(404, "Print preview expired.")
+    d = fitz.open(p)
+    return Response(d[max(0, min(n, len(d)) - 1)].get_pixmap(dpi=min(int(request.args.get("dpi", 150)), 300)).tobytes("png"), mimetype="image/png")
+
 # ---------- document actions that change the open document ----------
 @app.post("/api/do/<action>")
 def do(action):
     f = request.form; pid = f["id"]; doc = load(pid); pi = int(f.get("page", 1)) - 1; msg = None
     if action == "rotate":
         for p in (doc if f.get("scope") == "all" else [doc[pi]]): p.set_rotation((p.rotation + int(f["angle"])) % 360)
+        doc = bake_rotation(doc)
     elif action == "delete":
         if len(doc) < 2: abort(400, "A PDF needs at least one page.")
         doc.delete_page(pi)
@@ -223,6 +319,27 @@ def do(action):
                 x = 36 if al == "left" else p.rect.width - 36 - w if al == "right" else (p.rect.width - w) / 2
                 p.insert_text((x, yy), txt, fontsize=s, fontname="helv", color=rgb(f.get("color", "#444444")))
         msg = "Header and footer added."
+    elif action == "pagesetup": doc = page_setup(doc, f, pi + 1); msg = "Page setup applied."
+    elif action == "crop":
+        mt, mr, mb, ml = [float(f.get(k) or 0) * MM for k in ("mt", "mr", "mb", "ml")]
+        for i in pick(f, len(doc), pi + 1):
+            r = doc[i].rect; c = fitz.Rect(r.x0 + ml, r.y0 + mt, r.x1 - mr, r.y1 - mb)
+            if c.width < 10 or c.height < 10: abort(400, "Crop is larger than the page.")
+            doc[i].set_cropbox(c)
+        msg = "Margins cropped."
+    elif action == "resetcrop":
+        for i in pick(f, len(doc), pi + 1): doc[i].set_cropbox(doc[i].mediabox)
+        msg = "Crop reset."
+    elif action == "background":
+        for i in pick(f, len(doc), pi + 1): doc[i].draw_rect(doc[i].rect, color=None, fill=rgb(f.get("color", "#fff8dc")), overlay=False)
+        msg = "Background colour added."
+    elif action == "watermark":
+        txt, size, ang = f.get("text", "CONFIDENTIAL"), float(f.get("size") or 60), float(f.get("angle") or 45)
+        for i in pick(f, len(doc), pi + 1):
+            p = doc[i]; c = fitz.Point(p.rect.width / 2, p.rect.height / 2); tl = fitz.get_text_length(txt, fontname="helv", fontsize=size)
+            p.insert_text(fitz.Point(c.x - tl / 2, c.y + size / 3), txt, fontsize=size, fontname="helv", color=rgb(f.get("color", "#ff0000")),
+                          fill_opacity=float(f.get("opacity") or .25), morph=(c, fitz.Matrix(ang)))
+        msg = "Watermark added."
     elif action == "ocr": doc = searchable(doc); msg = "OCR complete: the text is now searchable."
     elif action == "color":
         mode = f["mode"]
@@ -251,6 +368,8 @@ def history(kind):
 def export(action):
     f = request.form; pid = f["id"]; doc = load(pid); name = NAMES.get(pid, "document")
     if action == "save": return out(doc.tobytes(garbage=3, deflate=True), name + ".pdf")
+    if action == "printpdf":
+        res, _, _ = print_doc(doc, f, int(f.get("page", 1))); return out(res.tobytes(garbage=3, deflate=True), name + "-print.pdf", info=f"Print-ready PDF with {len(res)} sheet(s).")
     if action == "protect":
         F = fitz; perm = (F.PDF_PERM_ACCESSIBILITY | F.PDF_PERM_PRINT | F.PDF_PERM_COPY | F.PDF_PERM_MODIFY | F.PDF_PERM_ANNOTATE | F.PDF_PERM_FORM | F.PDF_PERM_ASSEMBLE | F.PDF_PERM_PRINT_HQ)
         if f.get("no_print"): perm &= ~(F.PDF_PERM_PRINT | F.PDF_PERM_PRINT_HQ)

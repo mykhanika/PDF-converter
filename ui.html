@@ -36,10 +36,18 @@ input[type=text],input[type=password],input[type=number],select,textarea{backgro
 #sg{border:2px dashed var(--bd);border-radius:10px;background:#fff;width:100%;touch-action:none;cursor:crosshair}
 .ml div{display:flex;gap:6px;align-items:center;padding:3px 0}.ml span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
 @media(max-width:700px){header{padding:8px 10px;flex-wrap:wrap}.credit{order:9;width:100%;text-align:center;font-size:11px}header button{padding:5px 10px}.logo{font-size:17px}#dn{display:none}#home{padding:12px}.hero{padding:20px}.hero h2{font-size:22px}.rb{min-width:58px}#vw{padding:6px}}
-</style></head><body>
+
+.dg{max-height:92vh;overflow:auto}.dg label{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}.pgrid label:has(input[type=checkbox]){justify-content:flex-start}
+.r2{display:flex;gap:8px;flex-wrap:wrap}.pvbox{display:flex;gap:12px;align-items:center;min-height:60px}.pvbox img{max-height:150px;max-width:170px;border:1px solid var(--bd);background:#fff}.pvbox img:not([src]){display:none}
+#pr{display:none}
+@media (max-width:700px){.pgrid{grid-template-columns:1fr}}
+@media print{html,body{height:auto!important;display:block!important;background:#fff!important}body>*:not(#pr){display:none!important}#pr{display:block!important}#pr img{display:block;break-after:page}}
+</style><style id="pst"></style></head><body>
 <header><span class="logo">📕 PDF Toolkit</span><span id="dn">No document open</span><span class="credit">Created by Washim Reja. Contact: 7003714487</span><button id="hundo" title="Undo (Ctrl+Z)">↶ Undo</button><button id="hredo" title="Redo (Ctrl+Y)">↷ Redo</button><button id="hopen">Open</button><button id="hsave">Save</button></header>
 <div id="tabs"></div><div id="rib"></div>
 <div id="main"><div id="home"></div><div id="vw" hidden><canvas id="pv"></canvas></div></div>
+<div id="pr"></div>
 <div id="st"><span id="msg">Ready.</span><span id="pi"></span></div>
 <input type="file" id="fin" accept=".pdf" hidden><input type="file" id="iin" accept="image/*" hidden>
 <script>
@@ -51,9 +59,9 @@ const toast=(m,e)=>{$('#msg').textContent=m;$('#st').className=e?'err':''};
 const B=(i,l,f,t,free)=>({i,l,f,t,free});
 /* ---------- dialogs ---------- */
 function dlg(title,html,ok='OK',setup){return new Promise(res=>{const o=document.createElement('div');o.className='ov';o.style.setProperty('--a',ACC[curTab]||'#7c3aed');
- o.innerHTML=`<form class="dg"><h3>${title}</h3>${html}<div class="r"><button type="button">Cancel</button><button class="b">${ok}</button></div></form>`;document.body.append(o);
+ o.innerHTML=`<form class="dg"><h3>${title}</h3>${html}<div class="r"><button type="button" class="cx">Cancel</button><button class="b">${ok}</button></div></form>`;document.body.append(o);
  const f=o.firstChild;setup&&setup(f);f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));const r={d,f,fd:new FormData(f)};o.remove();res(r)};
- f.querySelector('button').onclick=()=>{o.remove();res(null)};const i=f.querySelector('input:not([type=file]),select,textarea');i&&i.focus()})}
+ f.querySelector('.cx').onclick=()=>{o.remove();res(null)};const i=f.querySelector('input:not([type=file]),select,textarea');i&&i.focus()})}
 async function call(url,fd){toast('Working…');try{const r=await fetch(url,{method:'POST',body:fd});if(!r.ok){toast(await r.text(),1);return null}return await r.json()}catch(e){toast(String(e),1);return null}}
 function adopt(j,keep){if(!keep){S.ops=[];S.hist=[];S.fut=[];S.sel=null}S.id=j.id;S.pages=j.pages;S.sizes=j.sizes;S.name=j.name;S.pg=keep?Math.min(S.pg,j.pages):1;S.ver++;$('#dn').textContent=j.name+'.pdf';if(j.msg)toast(j.msg);else toast('Ready.');load()}
 async function commit(){if(!S.ops.length||!S.id)return;const fd=new FormData();fd.append('id',S.id);fd.append('ops',JSON.stringify(S.ops));const j=await call('/api/apply',fd);if(j){S.ops=[];S.hist=[];S.fut=[];S.sel=null;S.ver++;adopt(j,1)}}
@@ -150,6 +158,49 @@ function moveOp(o,dx,dy){if(o.pts)o.pts=o.pts.map(p=>[p[0]+dx,p[1]+dy]);else if(
 function placed(){S.sel=S.ops.length-1;setTool('select');toast('Placed once. Drag to move, drag the blue corner to resize, press Delete to remove.')}
 addEventListener('keydown',e=>{const t=e.target.tagName;if(t=='INPUT'||t=='TEXTAREA'||t=='SELECT')return;const k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey;
  if(c&&k=='z'){e.preventDefault();e.shiftKey?redo():undo()}else if(c&&k=='y'){e.preventDefault();redo()}else if((k=='delete'||k=='backspace')&&S.sel!=null){e.preventDefault();delSel()}});
+/* ---------- print ---------- */
+const OPT=(n,o,sel)=>`<select name="${n}">${o.map(x=>`<option value="${x[0]}"${x[0]==sel?' selected':''}>${x[1]}</option>`).join('')}</select>`;
+const SCOPE=(v='all')=>`<label>Pages ${OPT('scope',[['all','All pages'],['current','Current page'],['custom','Custom range']],v)}</label><label>Range <input type="text" name="arg" placeholder="e.g. 1-3,5" size="12"></label>`;
+async function printDlg(pre={}){await commit();
+ const v=Object.assign({scope:'all',subset:'all',per:'1',paper:'original',orient:'auto',scale:'fit',margins:'narrow',color:'color'},pre);
+ const html=`<div class="pgrid">${SCOPE(v.scope)}
+ <label>Print ${OPT('subset',[['all','All in range'],['odd','Odd pages only'],['even','Even pages only']],v.subset)}</label>
+ <label>Pages per sheet ${OPT('per',[['1','1'],['2','2'],['4','4'],['6','6'],['9','9'],['booklet','Booklet']],v.per)}</label>
+ <label>Paper ${OPT('paper',[['original','Original size'],['A4','A4'],['A3','A3'],['A5','A5'],['Letter','Letter'],['Legal','Legal']],v.paper)}</label>
+ <label>Orientation ${OPT('orient',[['auto','Auto'],['portrait','Portrait'],['landscape','Landscape']],v.orient)}</label>
+ <label>Scale ${OPT('scale',[['fit','Fit to paper'],['shrink','Shrink oversized only'],['actual','Actual size'],['custom','Custom %']],v.scale)}</label>
+ <label>Custom % <input type="number" name="pct" value="100" min="10" max="400" style="width:80px"></label>
+ <label>Margins ${OPT('margins',[['none','None'],['narrow','Narrow'],['normal','Normal'],['wide','Wide']],v.margins)}</label>
+ <label>Colour ${OPT('color',[['color','Colour'],['gray','Grayscale'],['bw','Black &amp; white']],v.color)}</label>
+ <label><input type="checkbox" name="reverse" value="1"> Reverse page order</label>
+ <label><input type="checkbox" name="border" value="1"> Draw page borders</label>
+ <label><input type="checkbox" name="numbers" value="1"> Print sheet numbers</label></div>
+ <div class="pvbox"><img id="ppv" alt=""><small id="pinfo">Click Preview to see the first sheet.</small></div>
+ <div class="r2"><button type="button" id="ppreview">👁️ Preview</button><button type="button" id="psave">💾 Save print-ready PDF</button></div>
+ <small>Printer, copies and two-sided printing are chosen in the system print window that opens next. Booklet prints pages in folding order for double-sided printing.</small>`;
+ const r=await dlg('🖨️ Print',html,'Print',f=>{
+  const form=()=>{const fd=new FormData(f);fd.append('id',S.id);fd.append('page',S.pg);return fd};
+  const prev=async()=>{const j=await call('/api/print/prepare',form());if(j){f.querySelector('#ppv').src=`/api/print/${j.tok}/1?dpi=70&t=${Date.now()}`;f.querySelector('#pinfo').textContent=`${j.sheets} sheet(s), ${Math.round(j.w_mm)} x ${Math.round(j.h_mm)} mm`;toast('Ready.')}};
+  f.querySelector('#ppreview').onclick=prev;f.querySelector('#psave').onclick=()=>{const o=Object.fromEntries(new FormData(f));o.page=S.pg;exp('printpdf',o,'print.pdf')};
+  if(pre._pv)setTimeout(prev,50)});
+ r&&doPrint(r.d)}
+async function doPrint(o){await commit();const fd=new FormData();for(const k in o)fd.append(k,o[k]);fd.append('id',S.id);fd.append('page',S.pg);
+ if(/Android/i.test(navigator.userAgent)){toast('Android cannot print from this window, so a print-ready PDF is being saved. Open it and choose Print.');return exp('printpdf',{...o,page:S.pg},'print.pdf')}
+ const j=await call('/api/print/prepare',fd);if(!j)return;toast(`Preparing ${j.sheets} sheet(s)…`);
+ const box=$('#pr');box.innerHTML='';$('#pst').textContent=`@page{size:${j.w_mm}mm ${j.h_mm}mm;margin:0}#pr img{width:${j.w_mm}mm;height:${j.h_mm}mm}`;
+ const ims=[];for(let n=1;n<=j.sheets;n++){const im=new Image();im.src=`/api/print/${j.tok}/${n}?dpi=150`;ims.push(im);box.append(im)}
+ await Promise.all(ims.map(im=>im.decode().catch(()=>{})));toast('Opening the print window. If nothing appears, use Save print-ready PDF.');
+ const done=()=>{box.innerHTML='';removeEventListener('afterprint',done);toast('Ready.')};addEventListener('afterprint',done);window.print()}
+/* ---------- page setup ---------- */
+const MARG=`<label>Top mm <input type="number" name="mt" value="0" min="0" style="width:70px"></label><label>Bottom mm <input type="number" name="mb" value="0" min="0" style="width:70px"></label><label>Left mm <input type="number" name="ml" value="0" min="0" style="width:70px"></label><label>Right mm <input type="number" name="mr" value="0" min="0" style="width:70px"></label>`;
+const SIZE=`<label>Paper size ${OPT('paper',[['keep','Keep current'],['A4','A4'],['A3','A3'],['A5','A5'],['Letter','Letter'],['Legal','Legal'],['custom','Custom (mm)']],'keep')}</label><label>Custom W x H mm <span><input type="number" name="w" value="210" style="width:64px"> x <input type="number" name="h" value="297" style="width:64px"></span></label>`;
+const ORI=`<label>Orientation ${OPT('orient',[['keep','Keep current'],['portrait','Portrait'],['landscape','Landscape']],'keep')}</label>`;
+const SCL=`<label>Content scale ${OPT('scale',[['fit','Fit to page'],['actual','Actual size'],['custom','Custom %']],'fit')}</label><label>Custom % <input type="number" name="pct" value="100" min="10" max="400" style="width:80px"></label>`;
+async function psDlg(m){const T={all:['📐 Page Setup',SIZE+ORI+SCL+MARG],size:['📏 Page Size',SIZE+SCL],orient:['🔄 Orientation',ORI],grow:['⬜ Add Margins',MARG],crop:['✂️ Crop Margins',MARG],scale:['🔍 Scale Pages',SCL]}[m];
+ const r=await dlg(T[0],`<div class="pgrid">${SCOPE('all')}${T[1]}</div>${m=='grow'?'<small>Adds blank margin around the existing content (the page gets bigger).</small>':m=='crop'?'<small>Hides the edges. Use Reset Crop to bring them back.</small>':m=='all'?'<small>Margins here are measured inside the new page size.</small>':''}`,'Apply');
+ if(!r)return;if(m=='crop')mut('crop',r.d);else mut('pagesetup',{...r.d,grow:m=='grow'?1:''})}
+async function bgDlg(){const r=await dlg('🎨 Page Background',`<div class="pgrid">${SCOPE('all')}<label>Colour <input type="color" name="color" value="#fff8dc"></label></div>`,'Apply');r&&mut('background',r.d)}
+async function wmDlg(){const r=await dlg('💧 Watermark',`<div class="pgrid">${SCOPE('all')}<label>Text <input type="text" name="text" value="CONFIDENTIAL" required></label><label>Size <input type="number" name="size" value="60" min="10" max="300" style="width:80px"></label><label>Opacity <input type="number" name="opacity" value="0.25" min="0.05" max="1" step="0.05" style="width:80px"></label><label>Angle <input type="number" name="angle" value="45" min="-90" max="90" style="width:80px"></label><label>Colour <input type="color" name="color" value="#ff0000"></label></div>`,'Add watermark');r&&mut('watermark',r.d)}
 /* ---------- feature dialogs ---------- */
 async function signDlg(){const r=await dlg('✍️ Sign PDF','<canvas id="sg" width="560" height="200"></canvas><div><button type="button" id="sc">Clear</button> Draw your signature, then click on the page to place it.</div>','Use signature',f=>{
   const c=f.querySelector('#sg'),x=c.getContext('2d');let d=false,ink=false;x.lineWidth=4;x.lineCap='round';x.strokeStyle='#111';
@@ -167,7 +218,9 @@ const SEL=(n,o)=>`<select name="${n}">${o.map(x=>`<option value="${x[0]}">${x[1]
 const RIB={
  Home:[['File',[B('📂','Open',pick,0,1),B('💾','Save',()=>exp('save',{},'document.pdf')),B('🧩','Merge',mergeDlg,0,1),B('📥','Create PDF',toPdfDlg,0,1)]]],
  View:[['Zoom',[B('🔍','Actual Size',()=>zoom('act')),B('↔️','Fit Width',()=>zoom('w')),B('🗒️','Fit Page',()=>zoom('p')),B('➕','Zoom In',()=>zoom(1.25)),B('➖','Zoom Out',()=>zoom(.8))]],
-  ['Navigate',[B('⏮️','First',()=>go(1)),B('◀️','Previous',()=>go(S.pg-1)),B('▶️','Next',()=>go(S.pg+1)),B('⏭️','Last',()=>go(S.pages))]]],
+  ['Navigate',[B('⏮️','First',()=>go(1)),B('◀️','Previous',()=>go(S.pg-1)),B('▶️','Next',()=>go(S.pg+1)),B('⏭️','Last',()=>go(S.pages))]],
+  ['Print',[B('🖨️','Print…',()=>printDlg()),B('⚡','Quick Print',()=>doPrint({})),B('👁️','Print Preview',()=>printDlg({_pv:1})),B('📄','Current Page',()=>printDlg({scope:'current'})),B('1️⃣','Odd Pages',()=>printDlg({subset:'odd'})),B('2️⃣','Even Pages',()=>printDlg({subset:'even'})),B('🔳','4 per Sheet',()=>printDlg({per:'4'})),B('📖','Booklet',()=>printDlg({per:'booklet'})),B('💾','Print-ready PDF',async()=>{await commit();exp('printpdf',{page:S.pg},'print.pdf')})]],
+  ['Page setup',[B('📐','Page Setup…',()=>psDlg('all')),B('📏','Page Size',()=>psDlg('size')),B('🔄','Orientation',()=>psDlg('orient')),B('⬜','Add Margins',()=>psDlg('grow')),B('✂️','Crop Margins',()=>psDlg('crop')),B('↩️','Reset Crop',()=>mut('resetcrop',{scope:'all'})),B('🔍','Scale Pages',()=>psDlg('scale')),B('🎨','Background',bgDlg),B('💧','Watermark',wmDlg),B('#️⃣','Page Numbers',hfDlg)]]],
  Annotate:[['Text markup',[B('🖍️','Highlight',0,'hl'),B('<u>U</u>','Underline',0,'ul'),B('<s>S</s>','Strikethrough',0,'st')]],
   ['Draw',[B('📏','Freehand Line',0,'line'),B('🖊️','Pen',0,'pen'),B('🖌️','Brush',0,'brush'),B('🧽','Eraser',0,'eraser')]],
   ['Style',['<div class="ctl">Colour<input type="color" id="col"></div>','<div class="ctl">Thickness<select id="wid"><option>1</option><option>2</option><option selected>3</option><option>5</option><option>8</option></select></div>']],
