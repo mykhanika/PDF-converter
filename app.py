@@ -226,8 +226,28 @@ def to_pdf():
 # ---------- viewer ----------
 @app.get("/api/preview/<pid>/<int:pg>")
 def preview(pid, pg):
-    doc = load(pid); z = max(0.3, min(float(request.args.get("z", 1.5)), 5))
+    doc = load(pid); z = max(0.1, min(float(request.args.get("z", 1.5)), 5.4))
     return Response(doc[max(0, min(pg, len(doc)) - 1)].get_pixmap(matrix=fitz.Matrix(z, z)).tobytes("png"), mimetype="image/png")
+
+@app.post("/api/search")
+def search():
+    f = request.form; q = " ".join(f.get("q", "").split()); doc = load(f["id"]); case, whole = bool(f.get("case")), bool(f.get("whole"))
+    if not q: abort(400, "Type a word or phrase to find.")
+    hits, has_text, capped = [], False, False
+    for i, p in enumerate(doc):
+        if not has_text and p.get_text().strip(): has_text = True
+        words = None
+        for r in p.search_for(q):
+            if " " not in q and (case or whole):  # exact-case / whole-word filters apply to single words
+                if words is None: words = p.get_text("words")
+                cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
+                t = next((w[4] for w in words if w[0] <= cx <= w[2] and w[1] <= cy <= w[3]), "")
+                if case and q not in t: continue
+                if whole and not re.search(r"(?<!\w)" + re.escape(q) + r"(?!\w)", t, 0 if case else re.I): continue
+            hits.append({"page": i + 1, "r": [round(r.x0, 2), round(r.y0, 2), round(r.x1, 2), round(r.y1, 2)]})
+            if len(hits) >= 2000: capped = True; break
+        if capped: break
+    return jsonify(hits=hits, has_text=has_text, capped=capped)
 
 @app.post("/api/textat")
 def textat():

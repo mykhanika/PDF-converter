@@ -43,12 +43,27 @@ input[type=text],input[type=password],input[type=number],select,textarea{backgro
 #pr{display:none}
 @media (max-width:700px){.pgrid{grid-template-columns:1fr}}
 @media print{html,body{height:auto!important;display:block!important;background:#fff!important}body>*:not(#pr){display:none!important}#pr{display:block!important}#pr img{display:block;break-after:page}}
+
+/* ---- compact layout ---- */
+header{padding:4px 12px;gap:8px}.logo{font-size:16px}#dn{font-size:12px}.credit{font-size:11px;padding:2px 10px}header button{padding:3px 11px;font-size:12px}
+#tabs{padding:4px 10px 0;gap:2px;align-items:flex-end}#tabs button{padding:5px 13px;font-size:12.5px;border-radius:8px 8px 0 0}#tabs #rtog{margin-left:auto;padding:3px 9px;font-size:11px}
+#rib{padding:3px 8px;min-height:0;border-bottom-width:2px}.grp{padding:0 7px}.gt{font-size:9px;padding-top:1px;letter-spacing:.5px}
+.rb{min-width:0;padding:2px 6px;gap:0;font-size:10.5px;border-radius:7px;white-space:nowrap}.rb i{font-size:16px}
+.ctl{font-size:10px;gap:1px}.ctl input,.ctl select{width:72px;padding:1px 4px;font-size:11px}
+#st{padding:2px 12px;font-size:12px;align-items:center;gap:12px}#vw{padding:8px}
+.hero{padding:16px 20px;border-radius:14px}.hero h2{font-size:20px;margin:0 0 2px}.hero p{margin:0 0 10px;font-size:13px}.hero button{padding:7px 16px;font-size:13px}
+#home{padding:14px}.hg{margin:14px 0 6px;font-size:11px}.tiles{grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:8px}.tile{padding:9px 11px;border-radius:11px}.tile i{font-size:20px;margin-bottom:1px}.tile b{font-size:12.5px}.tile small{font-size:10.5px;line-height:1.25;display:block}
+.zc{display:flex;align-items:center;gap:6px}.zc button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:6px;width:22px;height:20px;cursor:pointer;line-height:1;padding:0}
+.zc input[type=text]{width:50px;padding:1px 4px;text-align:center;font-size:12px}.zc input[type=range]{width:130px;accent-color:var(--a)}
+#sb{position:absolute;top:8px;right:22px;z-index:5;display:flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:5px 8px;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:12px}#sb[hidden]{display:none}
+#sb input[type=text]{padding:3px 8px;font-size:12px}#sb label{display:flex;align-items:center;gap:2px;color:var(--mu);cursor:pointer}#sb button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:6px;padding:2px 8px;cursor:pointer}#sn{min-width:70px;color:var(--mu)}
+@media(max-width:700px){.zc input[type=range]{width:70px}#pi{display:none}#sb{left:8px;right:8px;flex-wrap:wrap}}
 </style><style id="pst"></style></head><body>
-<header><span class="logo">📕 PDF Toolkit</span><span id="dn">No document open</span><span class="credit">Created by Washim Reja. Contact: 7003714487</span><button id="hundo" title="Undo (Ctrl+Z)">↶ Undo</button><button id="hredo" title="Redo (Ctrl+Y)">↷ Redo</button><button id="hopen">Open</button><button id="hsave">Save</button></header>
+<header><span class="logo">📕 PDF Toolkit</span><span id="dn">No document open</span><span class="credit">Created by Washim Reja. Contact: 7003714487</span><button id="hfind" title="Find (Ctrl+F)">🔍 Find</button><button id="hundo" title="Undo (Ctrl+Z)">↶ Undo</button><button id="hredo" title="Redo (Ctrl+Y)">↷ Redo</button><button id="hopen">Open</button><button id="hsave">Save</button></header>
 <div id="tabs"></div><div id="rib"></div>
-<div id="main"><div id="home"></div><div id="vw" hidden><canvas id="pv"></canvas></div></div>
+<div id="main"><div id="sb" hidden><input type="text" id="sq" placeholder="Find a word or phrase" size="22"><label title="Match case"><input type="checkbox" id="sc1">Aa</label><label title="Whole word (single words)"><input type="checkbox" id="sw">Word</label><span id="sn"></span><button id="sp" title="Previous (Shift+Enter)">▲</button><button id="sx" title="Next (Enter)">▼</button><button id="sclose" title="Close (Esc)">✕</button></div><div id="home"></div><div id="vw" hidden><canvas id="pv"></canvas></div></div>
 <div id="pr"></div>
-<div id="st"><span id="msg">Ready.</span><span id="pi"></span></div>
+<div id="st"><span id="msg">Ready.</span><span id="pi"></span><span class="zc"><button id="zm" title="Zoom out (Ctrl+scroll down)">−</button><input type="range" id="zs" min="10" max="400" step="5" value="100"><button id="zp" title="Zoom in (Ctrl+scroll up)">+</button><input type="text" id="zv" value="100%" title="Type a zoom % and press Enter"></span></div>
 <input type="file" id="fin" accept=".pdf" hidden><input type="file" id="iin" accept="image/*" hidden>
 <script>
 const $=s=>document.querySelector(s);
@@ -63,7 +78,7 @@ function dlg(title,html,ok='OK',setup){return new Promise(res=>{const o=document
  const f=o.firstChild;setup&&setup(f);f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));const r={d,f,fd:new FormData(f)};o.remove();res(r)};
  f.querySelector('.cx').onclick=()=>{o.remove();res(null)};const i=f.querySelector('input:not([type=file]),select,textarea');i&&i.focus()})}
 async function call(url,fd){toast('Working…');try{const r=await fetch(url,{method:'POST',body:fd});if(!r.ok){toast(await r.text(),1);return null}return await r.json()}catch(e){toast(String(e),1);return null}}
-function adopt(j,keep){if(!keep){S.ops=[];S.hist=[];S.fut=[];S.sel=null}S.id=j.id;S.pages=j.pages;S.sizes=j.sizes;S.name=j.name;S.pg=keep?Math.min(S.pg,j.pages):1;S.ver++;$('#dn').textContent=j.name+'.pdf';if(j.msg)toast(j.msg);else toast('Ready.');load()}
+function adopt(j,keep){S.search=null;$('#sn').textContent='';if(!keep){S.ops=[];S.hist=[];S.fut=[];S.sel=null}S.id=j.id;S.pages=j.pages;S.sizes=j.sizes;S.name=j.name;S.pg=keep?Math.min(S.pg,j.pages):1;S.ver++;$('#dn').textContent=j.name+'.pdf';if(j.msg)toast(j.msg);else toast('Ready.');load()}
 async function commit(){if(!S.ops.length||!S.id)return;const fd=new FormData();fd.append('id',S.id);fd.append('ops',JSON.stringify(S.ops));const j=await call('/api/apply',fd);if(j){S.ops=[];S.hist=[];S.fut=[];S.sel=null;S.ver++;adopt(j,1)}}
 async function mut(a,x={}){await commit();const fd=new FormData();fd.append('id',S.id);fd.append('page',S.pg);for(const k in x)fd.append(k,x[k]);const j=await call('/api/do/'+a,fd);j&&adopt(j,1)}
 async function exp(a,x={},nm='file'){await commit();const fd=new FormData();fd.append('id',S.id);for(const k in x)fd.append(k,x[k]);toast('Working…');
@@ -85,10 +100,24 @@ async function mergeDlg(){let files=[];await commit();
 async function toPdfDlg(){const r=await dlg('📥 Create PDF from files','<p>Word, Excel, PowerPoint, text and images. Several files are merged into one PDF.</p><input type="file" name="files" multiple required>','Convert');
  if(!r)return;const j=await call('/api/to-pdf',r.fd);if(j){S.ops=[];adopt(j);tab('View');zoom('w')}}
 /* ---------- viewer ---------- */
-function load(){if(!S.id)return;S.el=new Image();S.el.onload=()=>{pv.width=S.el.width;pv.height=S.el.height;draw()};S.el.src=`/api/preview/${S.id}/${S.pg}?z=${S.Z.toFixed(3)}&v=${S.ver}`;$('#pi').textContent=`Page ${S.pg} / ${S.pages}  ·  ${Math.round(S.Z*75)}%`}
+function load(){if(!S.id)return;const im=new Image(),z=S.Z;S.el=im;
+ im.onload=()=>{if(S.el!==im)return;pv.width=im.width;pv.height=im.height;pv.style.width=pv.style.height='';draw();const vw=$('#vw');
+  if(S.anchor){const a=S.anchor;S.anchor=null;vw.scrollLeft=pv.offsetLeft+a.px*S.Z-a.mx;vw.scrollTop=pv.offsetTop+a.py*S.Z-a.my}
+  if(S.scrollHit){S.scrollHit=false;scrollToHit()}};
+ im.src=`/api/preview/${S.id}/${S.pg}?z=${z.toFixed(3)}&v=${S.ver}`;syncZoom();$('#pi').textContent=`Page ${S.pg} / ${S.pages}`}
 function go(n){if(S.id&&n>=1&&n<=S.pages){S.pg=n;load()}}
 function zoom(m){if(!S.id)return;const [W,H]=S.sizes[S.pg-1],vw=$('#vw'),aw=(vw.clientWidth||900)-40,ah=(vw.clientHeight||600)-40;
- S.Z=m=='act'?96/72:m=='w'?aw/W:m=='p'?Math.min(aw/W,ah/H):Math.max(.3,Math.min(5,S.Z*m));load()}
+ S.want=null;clearTimeout(S.wt);S.Z=m=='act'?96/72:m=='w'?aw/W:m=='p'?Math.min(aw/W,ah/H):S.Z*m;S.Z=Math.max(.133,Math.min(5.34,S.Z));load()}
+const syncZoom=()=>{const p=Math.round((S.want||S.Z)*75);$('#zs').value=p;$('#zv').value=p+'%'};
+function setPct(p){if(!S.id||!(p>0))return;S.want=null;clearTimeout(S.wt);S.Z=Math.max(10,Math.min(400,p))/75;load()}
+$('#zs').oninput=e=>{$('#zv').value=e.target.value+'%';clearTimeout(S.st);S.st=setTimeout(()=>setPct(+e.target.value),120)};
+$('#zm').onclick=()=>zoom(1/1.1);$('#zp').onclick=()=>zoom(1.1);
+$('#zv').onfocus=e=>e.target.select();$('#zv').onkeydown=e=>{if(e.key=='Enter'){setPct(parseFloat($('#zv').value));e.target.blur()}};
+$('#vw').addEventListener('wheel',e=>{if(!(e.ctrlKey||e.metaKey)||!S.id)return;e.preventDefault();
+ const vw=$('#vw'),r=vw.getBoundingClientRect(),cb=pv.getBoundingClientRect();
+ if(!S.anchor)S.anchor={px:(e.clientX-cb.left)*(pv.width/cb.width)/S.Z,py:(e.clientY-cb.top)*(pv.height/cb.height)/S.Z,mx:e.clientX-r.left,my:e.clientY-r.top};
+ S.want=Math.max(.133,Math.min(5.34,(S.want||S.Z)*(e.deltaY<0?1.1:1/1.1)));pv.style.width=(pv.width*S.want/S.Z)+'px';pv.style.height=(pv.height*S.want/S.Z)+'px';syncZoom();
+ clearTimeout(S.wt);S.wt=setTimeout(()=>{if(!S.want)return;S.Z=S.want;S.want=null;load()},110)},{passive:false});
 const pv=$('#pv'),g=pv.getContext('2d');
 function drawOp(o,Z=S.Z){g.save();g.lineCap=g.lineJoin='round';const c=o.color||'#000';
  if(o.t=='hl'){g.fillStyle=c;g.globalAlpha=.4;g.fillRect(o.x*Z,o.y*Z,o.w*Z,o.h*Z)}
@@ -106,6 +135,7 @@ function measDraw(m){const Z=S.Z;g.save();g.strokeStyle='#0ea5e9';g.fillStyle='#
  const d=Math.hypot(m.x1-m.x0,m.y1-m.y0),f={pt:1,mm:25.4/72,cm:2.54/72,in:1/72}[S.unit],t=(d*f).toFixed(2)+' '+S.unit;g.font='bold 14px Arial';const w=g.measureText(t).width+10,mx=(m.x0+m.x1)/2*Z,my=(m.y0+m.y1)/2*Z;g.fillRect(mx-w/2,my-22,w,20);g.fillStyle='#fff';g.textAlign='center';g.fillText(t,mx,my-7);g.restore()}
 let drag=null;
 function draw(){if(!S.el.complete||!S.el.width)return;g.drawImage(S.el,0,0);S.ops.filter(o=>o.page==S.pg).forEach(o=>drawOp(o));S.meas.filter(m=>m.page==S.pg).forEach(measDraw);
+ if(S.search){const Z=S.Z;g.save();S.search.hits.forEach((h,i)=>{if(h.page!=S.pg)return;const cur=i==S.search.idx,r=h.r;g.fillStyle=cur?'rgba(255,140,0,.55)':'rgba(255,225,0,.45)';g.fillRect(r[0]*Z,r[1]*Z,(r[2]-r[0])*Z,(r[3]-r[1])*Z);if(cur){g.strokeStyle='#e65100';g.lineWidth=2;g.strokeRect(r[0]*Z,r[1]*Z,(r[2]-r[0])*Z,(r[3]-r[1])*Z)}});g.restore()}
  const so=S.ops[S.sel];if(so&&so.page==S.pg){const b=bbox(so),Z=S.Z;g.save();g.strokeStyle='#2563eb';g.setLineDash([5,4]);g.lineWidth=2;g.strokeRect(b[0]*Z-3,b[1]*Z-3,(b[2]-b[0])*Z+6,(b[3]-b[1])*Z+6);if(resizable(so)){g.setLineDash([]);g.fillStyle='#2563eb';g.fillRect(b[2]*Z-6,b[3]*Z-6,12,12)}g.restore()}
  if(!drag)return;const [x0,y0]=drag.p0,[x1,y1]=drag.p1,t=S.tool,Z=S.Z;
  if(['hl','ul','st','redact'].includes(t))drawOp({t,color:S.col,x:Math.min(x0,x1),y:Math.min(y0,y1),w:Math.abs(x1-x0),h:Math.abs(y1-y0)});
@@ -143,6 +173,22 @@ async function finish(d){const t=S.tool,[x0,y0]=d.p0,[x1,y1]=d.p1,page=S.pg,colo
   if(!j.found)return toast('No editable text there. Click directly on a word.',1);toast('Ready.');const a=await dlg('Edit content',`<input type="text" name="v" size="38" value="${j.text.replace(/"/g,'&quot;')}" required><small>Edits one line segment at a time using a standard font.</small>`,'Replace');
   a&&add({t:'replace',page,bbox:j.bbox,origin:j.origin,s:j.size,bold:j.bold,color:j.color,v:a.d.v})}
  else if(t=='measure'){if(r.w+r.h>2)S.meas.push({page,x0,y0,x1,y1})}}
+/* ---------- find ---------- */
+const skey=()=>$('#sq').value.trim()+'|'+$('#sc1').checked+'|'+$('#sw').checked+'|'+S.ver;
+function openSearch(){if(!S.id)return toast('Open a PDF first.',1);if(curTab=='Home')tab('View');$('#sb').hidden=false;$('#sq').focus();$('#sq').select()}
+function closeSearch(){$('#sb').hidden=true;S.search=null;$('#sn').textContent='';draw()}
+async function runSearch(){const q=$('#sq').value.trim();if(!q)return;const fd=new FormData();fd.append('id',S.id);fd.append('q',q);if($('#sc1').checked)fd.append('case',1);if($('#sw').checked)fd.append('whole',1);
+ const j=await call('/api/search',fd);if(!j)return;S.search={q,key:skey(),hits:j.hits,idx:0};
+ if(!j.hits.length){$('#sn').textContent=j.has_text?'No matches':'No text';toast(j.has_text?'No matches found.':'This PDF has no text layer. Run OCR first (Convert, Make Searchable).',!j.has_text);return draw()}
+ toast(`${j.hits.length}${j.capped?'+':''} match(es) found.`);gotoHit(0)}
+function gotoHit(i){const s=S.search;if(!s||!s.hits.length)return;s.idx=(i+s.hits.length)%s.hits.length;$('#sn').textContent=`${s.idx+1} of ${s.hits.length}`;const h=s.hits[s.idx];
+ if(h.page!=S.pg){S.pg=h.page;S.scrollHit=true;load()}else{draw();scrollToHit()}}
+function scrollToHit(){const s=S.search;if(!s)return;const h=s.hits[s.idx];if(!h||h.page!=S.pg)return;const vw=$('#vw'),Z=S.Z,x=pv.offsetLeft+h.r[0]*Z,y=pv.offsetTop+h.r[1]*Z;
+ if(y<vw.scrollTop+30||y>vw.scrollTop+vw.clientHeight-70)vw.scrollTop=y-vw.clientHeight/3;if(x<vw.scrollLeft+10||x>vw.scrollLeft+vw.clientWidth-80)vw.scrollLeft=x-vw.clientWidth/3}
+const nextHit=d=>{if(!S.search||S.search.key!=skey())return runSearch();gotoHit(S.search.idx+d)};
+$('#sq').onkeydown=e=>{if(e.key=='Enter'){e.preventDefault();nextHit(e.shiftKey?-1:1)}else if(e.key=='Escape')closeSearch()};
+$('#sx').onclick=()=>nextHit(1);$('#sp').onclick=()=>nextHit(-1);$('#sclose').onclick=closeSearch;$('#hfind').onclick=openSearch;
+$('#sc1').onchange=$('#sw').onchange=()=>{if($('#sq').value.trim())runSearch()};
 /* ---------- undo / redo / select ---------- */
 const clone=()=>JSON.parse(JSON.stringify(S.ops));
 function pushHist(){S.hist.push(clone());if(S.hist.length>80)S.hist.shift();S.fut=[]}
@@ -156,7 +202,10 @@ function hitIdx(p){for(let i=S.ops.length-1;i>=0;i--){const o=S.ops[i];if(o.page
 function handleHit(p){const o=S.ops[S.sel];if(!resizable(o)||o.page!=S.pg)return false;const t=14/S.Z;return Math.abs(p[0]-(o.x+o.w))<t&&Math.abs(p[1]-(o.y+o.h))<t}
 function moveOp(o,dx,dy){if(o.pts)o.pts=o.pts.map(p=>[p[0]+dx,p[1]+dy]);else if(o.bbox){o.bbox=o.bbox.map((v,i)=>v+(i%2?dy:dx));o.origin=[o.origin[0]+dx,o.origin[1]+dy]}else{o.x+=dx;o.y+=dy;if(o.bx!=null){o.bx+=dx;o.by+=dy}}}
 function placed(){S.sel=S.ops.length-1;setTool('select');toast('Placed once. Drag to move, drag the blue corner to resize, press Delete to remove.')}
-addEventListener('keydown',e=>{const t=e.target.tagName;if(t=='INPUT'||t=='TEXTAREA'||t=='SELECT')return;const k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey;
+addEventListener('keydown',e=>{const k0=e.key.toLowerCase(),cm=e.ctrlKey||e.metaKey;
+ if(cm&&k0=='f'){e.preventDefault();openSearch();return}
+ if(cm&&['=','+','-','0'].includes(k0)){e.preventDefault();if(S.id){if(k0=='0')zoom('act');else zoom(k0=='-'?1/1.1:1.1)}return}
+ const t=e.target.tagName;if(t=='INPUT'||t=='TEXTAREA'||t=='SELECT')return;const k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey;
  if(c&&k=='z'){e.preventDefault();e.shiftKey?redo():undo()}else if(c&&k=='y'){e.preventDefault();redo()}else if((k=='delete'||k=='backspace')&&S.sel!=null){e.preventDefault();delSel()}});
 /* ---------- print ---------- */
 const OPT=(n,o,sel)=>`<select name="${n}">${o.map(x=>`<option value="${x[0]}"${x[0]==sel?' selected':''}>${x[1]}</option>`).join('')}</select>`;
@@ -217,8 +266,8 @@ const SEL=(n,o)=>`<select name="${n}">${o.map(x=>`<option value="${x[0]}">${x[1]
 /* ---------- ribbon ---------- */
 const RIB={
  Home:[['File',[B('📂','Open',pick,0,1),B('💾','Save',()=>exp('save',{},'document.pdf')),B('🧩','Merge',mergeDlg,0,1),B('📥','Create PDF',toPdfDlg,0,1)]]],
- View:[['Zoom',[B('🔍','Actual Size',()=>zoom('act')),B('↔️','Fit Width',()=>zoom('w')),B('🗒️','Fit Page',()=>zoom('p')),B('➕','Zoom In',()=>zoom(1.25)),B('➖','Zoom Out',()=>zoom(.8))]],
-  ['Navigate',[B('⏮️','First',()=>go(1)),B('◀️','Previous',()=>go(S.pg-1)),B('▶️','Next',()=>go(S.pg+1)),B('⏭️','Last',()=>go(S.pages))]],
+ View:[['Zoom',[B('🔍','Actual Size',()=>zoom('act')),B('↔️','Fit Width',()=>zoom('w')),B('🗒️','Fit Page',()=>zoom('p')),B('➕','Zoom In',()=>zoom(1.25)),B('➖','Zoom Out',()=>zoom(.8)),'<div class="ctl">Zoom %<select id="zsel"><option value="">choose</option>'+[25,50,75,100,125,150,200,300,400].map(v=>`<option value="${v}">${v}%</option>`).join('')+'</select></div>']],
+  ['Navigate',[B('⏮️','First',()=>go(1)),B('◀️','Previous',()=>go(S.pg-1)),B('▶️','Next',()=>go(S.pg+1)),B('⏭️','Last',()=>go(S.pages)),B('🔍','Find',openSearch)]],
   ['Print',[B('🖨️','Print…',()=>printDlg()),B('⚡','Quick Print',()=>doPrint({})),B('👁️','Print Preview',()=>printDlg({_pv:1})),B('📄','Current Page',()=>printDlg({scope:'current'})),B('1️⃣','Odd Pages',()=>printDlg({subset:'odd'})),B('2️⃣','Even Pages',()=>printDlg({subset:'even'})),B('🔳','4 per Sheet',()=>printDlg({per:'4'})),B('📖','Booklet',()=>printDlg({per:'booklet'})),B('💾','Print-ready PDF',async()=>{await commit();exp('printpdf',{page:S.pg},'print.pdf')})]],
   ['Page setup',[B('📐','Page Setup…',()=>psDlg('all')),B('📏','Page Size',()=>psDlg('size')),B('🔄','Orientation',()=>psDlg('orient')),B('⬜','Add Margins',()=>psDlg('grow')),B('✂️','Crop Margins',()=>psDlg('crop')),B('↩️','Reset Crop',()=>mut('resetcrop',{scope:'all'})),B('🔍','Scale Pages',()=>psDlg('scale')),B('🎨','Background',bgDlg),B('💧','Watermark',wmDlg),B('#️⃣','Page Numbers',hfDlg)]]],
  Annotate:[['Text markup',[B('🖍️','Highlight',0,'hl'),B('<u>U</u>','Underline',0,'ul'),B('<s>S</s>','Strikethrough',0,'st')]],
@@ -245,9 +294,12 @@ function tab(n){curTab=n;S.tool=null;document.documentElement.style.setProperty(
   items.forEach(it=>{if(typeof it=='string'){gb.insertAdjacentHTML('beforeend',it);return}const b=document.createElement('button');b.className='rb';b.innerHTML=`<i>${it.i}</i>${it.l}`;if(it.t)b.dataset.t=it.t;
    b.onclick=()=>{if(!S.id&&!it.free)return toast('Open a PDF first.',1);if(it.t){setTool(S.tool==it.t?null:it.t);if(it.t=='measure')return;toast(S.tool?'Tool active: '+it.l:'Ready.')}else it.f()};gb.append(b)});
   gp.append(gb);gp.insertAdjacentHTML('beforeend',`<div class="gt">${gt}</div>`);rib.append(gp)}
+ const zsel=$('#zsel');if(zsel)zsel.onchange=()=>{if(zsel.value){setPct(+zsel.value);zsel.value=''}};
  const col=$('#col');if(col){col.value=S.col;col.oninput=()=>S.col=col.value;$('#wid').value=S.w;$('#wid').onchange=e=>S.w=+e.target.value}
- const h=n=='Home';$('#home').hidden=!h;$('#vw').hidden=h;rib.style.display='flex';if(!h&&S.id)setTimeout(()=>{load()},0)}
-Object.keys(ACC).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>tab(n);$('#tabs').append(b)});
+ const h=n=='Home';$('#home').hidden=!h;$('#vw').hidden=h;ribApply();if(!h&&S.id)setTimeout(()=>{load()},0)}
+const ribApply=()=>{$('#rib').style.display=S.rh?'none':'flex';$('#rtog').textContent=S.rh?'▼ Ribbon':'▲ Ribbon'};
+Object.keys(ACC).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{S.rh=false;tab(n)};b.ondblclick=()=>{S.rh=true;tab(n)};b.title='Double-click to hide the ribbon';$('#tabs').append(b)});
+const rt=document.createElement('button');rt.id='rtog';rt.title='Show or hide the ribbon for a bigger view';rt.onclick=()=>{S.rh=!S.rh;ribApply()};$('#tabs').append(rt);
 $('#hopen').onclick=pick;$('#hundo').onclick=undo;$('#hredo').onclick=redo;$('#hsave').onclick=()=>S.id?exp('save',{},'document.pdf'):toast('Open a PDF first.',1);
 /* ---------- home dashboard ---------- */
 const go2=(t,f)=>()=>{if(!S.id&&!f)return toast('Open a PDF first.',1);tab(t)};
