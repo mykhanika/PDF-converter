@@ -1,0 +1,268 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PDF Toolkit</title><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon-192.png"><meta name="theme-color" content="#7c3aed"><style>
+:root{--bg:#f4f1fb;--card:#fff;--tx:#1e1b2e;--mu:#6b6785;--bd:#e3def3;--a:#7c3aed;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#14121f;--card:#1f1c30;--tx:#f0edfb;--mu:#a29fbd;--bd:#35314f}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{display:flex;flex-direction:column;background:var(--bg);color:var(--tx);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+header{display:flex;align-items:center;gap:14px;padding:10px 18px;color:#fff;background:linear-gradient(110deg,#6d28d9,#db2777 55%,#f97316)}
+.credit{font-size:12px;font-weight:600;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:14px;white-space:nowrap}
+.logo{font:700 20px "Segoe UI",sans-serif;letter-spacing:.3px}#dn{flex:1;min-width:0;opacity:.9;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:20px;padding:6px 16px;cursor:pointer;font:inherit;font-weight:600}header button:hover{background:rgba(255,255,255,.35)}
+#tabs{display:flex;gap:4px;padding:8px 14px 0;background:var(--card);border-bottom:1px solid var(--bd);overflow-x:auto}
+#tabs button{border:0;background:none;color:var(--mu);padding:9px 16px;font:600 14px inherit;cursor:pointer;border-radius:10px 10px 0 0;white-space:nowrap}
+#tabs button.on{color:#fff;background:var(--a)}#tabs button:not(.on):hover{color:var(--a)}
+#rib{display:flex;gap:0;padding:8px 12px;background:var(--card);border-bottom:3px solid var(--a);overflow-x:auto;min-height:92px}
+.grp{display:flex;flex-direction:column;padding:0 10px;border-right:1px solid var(--bd)}.grp:last-child{border:0}
+.gb{display:flex;gap:2px;flex:1;align-items:stretch}.gt{text-align:center;font-size:11px;font-weight:700;color:var(--a);text-transform:uppercase;letter-spacing:.8px;padding-top:3px}
+.rb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:64px;padding:5px 7px;border:0;border-radius:10px;background:none;color:var(--tx);cursor:pointer;font:12px inherit}
+.rb i{font-style:normal;font-size:23px;line-height:1.1}.rb:hover{background:color-mix(in srgb,var(--a) 14%,transparent);transform:translateY(-1px)}
+.rb.on{background:var(--a);color:#fff;box-shadow:0 3px 10px color-mix(in srgb,var(--a) 50%,transparent)}
+.ctl{display:flex;flex-direction:column;gap:4px;justify-content:center;font-size:12px;color:var(--mu);padding:0 8px}.ctl input,.ctl select{width:90px}
+#main{flex:1;min-height:0;position:relative}
+#vw{position:absolute;inset:0;overflow:auto;background:linear-gradient(160deg,#8b87a8,#5e5a7a);padding:16px;text-align:center}
+#pv{background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.35);display:inline-block}
+#home{position:absolute;inset:0;overflow:auto;padding:22px}
+.hero{border-radius:20px;padding:34px;color:#fff;background:linear-gradient(120deg,#6d28d9,#db2777 60%,#f97316);box-shadow:0 10px 30px rgba(124,58,237,.35)}
+.hero h2{margin:0 0 6px;font:700 30px "Segoe UI",sans-serif}.hero p{margin:0 0 16px;opacity:.92}.hero button{background:#fff;color:#7c3aed;border:0;border-radius:24px;padding:11px 24px;font:700 15px inherit;cursor:pointer;margin-right:10px}
+.hg{margin:24px 0 8px;font:700 13px inherit;text-transform:uppercase;letter-spacing:1px;color:var(--mu)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.tile{border:0;border-radius:16px;padding:16px;text-align:left;color:#fff;cursor:pointer;font:inherit;transition:transform .15s,box-shadow .15s}
+.tile:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(0,0,0,.25)}.tile b{display:block;font-size:15px}.tile small{opacity:.9}.tile i{font-style:normal;font-size:28px;display:block;margin-bottom:4px}
+#st{padding:6px 16px;font-size:13px;color:var(--mu);background:var(--card);border-top:1px solid var(--bd);display:flex;gap:16px}#st.err{color:#dc2626;font-weight:600}#st span:first-child{flex:1}
+.ov{position:fixed;inset:0;background:rgba(10,8,25,.55);display:flex;align-items:center;justify-content:center;z-index:9;backdrop-filter:blur(3px)}
+.dg{background:var(--card);border-radius:16px;padding:20px;min-width:320px;max-width:92vw;display:flex;flex-direction:column;gap:10px;border-top:5px solid var(--a);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.dg h3{margin:0;color:var(--a)}.dg .r{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.dg button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);padding:8px 16px;border-radius:10px;cursor:pointer;font:inherit}.dg button.b{background:var(--a);border-color:var(--a);color:#fff;font-weight:600}
+input[type=text],input[type=password],input[type=number],select,textarea{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;font:inherit}
+#sg{border:2px dashed var(--bd);border-radius:10px;background:#fff;width:100%;touch-action:none;cursor:crosshair}
+.ml div{display:flex;gap:6px;align-items:center;padding:3px 0}.ml span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+@media(max-width:700px){header{padding:8px 10px;flex-wrap:wrap}.credit{order:9;width:100%;text-align:center;font-size:11px}header button{padding:5px 10px}.logo{font-size:17px}#dn{display:none}#home{padding:12px}.hero{padding:20px}.hero h2{font-size:22px}.rb{min-width:58px}#vw{padding:6px}}
+
+.dg{max-height:92vh;overflow:auto}.dg label{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}.pgrid label:has(input[type=checkbox]){justify-content:flex-start}
+.r2{display:flex;gap:8px;flex-wrap:wrap}.pvbox{display:flex;gap:12px;align-items:center;min-height:60px}.pvbox img{max-height:150px;max-width:170px;border:1px solid var(--bd);background:#fff}.pvbox img:not([src]){display:none}
+#pr{display:none}
+@media (max-width:700px){.pgrid{grid-template-columns:1fr}}
+@media print{html,body{height:auto!important;display:block!important;background:#fff!important}body>*:not(#pr){display:none!important}#pr{display:block!important}#pr img{display:block;break-after:page}}
+</style><style id="pst"></style></head><body>
+<header><span class="logo">📕 PDF Toolkit</span><span id="dn">No document open</span><span class="credit">Created by Washim Reja. Contact: 7003714487</span><button id="hundo" title="Undo (Ctrl+Z)">↶ Undo</button><button id="hredo" title="Redo (Ctrl+Y)">↷ Redo</button><button id="hopen">Open</button><button id="hsave">Save</button></header>
+<div id="tabs"></div><div id="rib"></div>
+<div id="main"><div id="home"></div><div id="vw" hidden><canvas id="pv"></canvas></div></div>
+<div id="pr"></div>
+<div id="st"><span id="msg">Ready.</span><span id="pi"></span></div>
+<input type="file" id="fin" accept=".pdf" hidden><input type="file" id="iin" accept="image/*" hidden>
+<script>
+const $=s=>document.querySelector(s);
+const S={id:null,pages:0,sizes:[],pg:1,Z:96/72,ops:[],tool:null,col:'#ffd400',w:3,meas:[],unit:'mm',ver:0,name:'',sig:null,img:null,stamp:null,hist:[],fut:[],sel:null,el:new Image()};
+const STAMPS=[['Approved',0,'#16a34a'],['Draft',4,'#2563eb'],['Confidential',2,'#dc2626'],['Final',7,'#7c3aed'],['Not Approved',10,'#dc2626'],['Top Secret',13,'#b91c1c'],['For Comment',8,'#d97706'],['Sold',12,'#0891b2']];
+const ACC={Home:'#7c3aed',View:'#0ea5e9',Annotate:'#f59e0b',Edit:'#ec4899',Organize:'#10b981',Convert:'#6366f1',Protect:'#ef4444',Tools:'#14b8a6'};
+const toast=(m,e)=>{$('#msg').textContent=m;$('#st').className=e?'err':''};
+const B=(i,l,f,t,free)=>({i,l,f,t,free});
+/* ---------- dialogs ---------- */
+function dlg(title,html,ok='OK',setup){return new Promise(res=>{const o=document.createElement('div');o.className='ov';o.style.setProperty('--a',ACC[curTab]||'#7c3aed');
+ o.innerHTML=`<form class="dg"><h3>${title}</h3>${html}<div class="r"><button type="button" class="cx">Cancel</button><button class="b">${ok}</button></div></form>`;document.body.append(o);
+ const f=o.firstChild;setup&&setup(f);f.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f));const r={d,f,fd:new FormData(f)};o.remove();res(r)};
+ f.querySelector('.cx').onclick=()=>{o.remove();res(null)};const i=f.querySelector('input:not([type=file]),select,textarea');i&&i.focus()})}
+async function call(url,fd){toast('Working…');try{const r=await fetch(url,{method:'POST',body:fd});if(!r.ok){toast(await r.text(),1);return null}return await r.json()}catch(e){toast(String(e),1);return null}}
+function adopt(j,keep){if(!keep){S.ops=[];S.hist=[];S.fut=[];S.sel=null}S.id=j.id;S.pages=j.pages;S.sizes=j.sizes;S.name=j.name;S.pg=keep?Math.min(S.pg,j.pages):1;S.ver++;$('#dn').textContent=j.name+'.pdf';if(j.msg)toast(j.msg);else toast('Ready.');load()}
+async function commit(){if(!S.ops.length||!S.id)return;const fd=new FormData();fd.append('id',S.id);fd.append('ops',JSON.stringify(S.ops));const j=await call('/api/apply',fd);if(j){S.ops=[];S.hist=[];S.fut=[];S.sel=null;S.ver++;adopt(j,1)}}
+async function mut(a,x={}){await commit();const fd=new FormData();fd.append('id',S.id);fd.append('page',S.pg);for(const k in x)fd.append(k,x[k]);const j=await call('/api/do/'+a,fd);j&&adopt(j,1)}
+async function exp(a,x={},nm='file'){await commit();const fd=new FormData();fd.append('id',S.id);for(const k in x)fd.append(k,x[k]);toast('Working…');
+ const r=await fetch('/api/export/'+a,{method:'POST',body:fd});if(!r.ok)return toast(await r.text(),1);const j=await r.json();
+ const l=document.createElement('a');l.href=j.url;l.download='';document.body.append(l);l.click();l.remove();toast(j.info||'Saved. Check your Downloads.')}
+/* ---------- open / merge / convert ---------- */
+async function openFile(f,pw){const fd=new FormData();fd.append('file',f);if(pw)fd.append('password',pw);const j=await call('/api/open',fd);if(!j)return;
+ if(j.needs_password){const r=await dlg('🔒 Password required','<input type="password" name="p" placeholder="Document password" required>','Unlock');return r&&openFile(f,r.d.p)}
+ S.ops=[];S.meas=[];adopt(j);tab('View');zoom('w')}
+const pick=()=>$('#fin').click();$('#fin').onchange=e=>{e.target.files[0]&&openFile(e.target.files[0]);e.target.value=''};
+addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];f&&/\.pdf$/i.test(f.name)&&openFile(f)});
+async function mergeDlg(){let files=[];await commit();
+ const r=await dlg('🧩 Merge PDFs',`<input type="file" id="mf" multiple accept=".pdf"><div class="ml" id="ml">No files added yet.</div>${S.id?'<label><input type="checkbox" name="cur" checked> Put the open document first</label>':''}`,'Merge',f=>{
+  const draw=()=>{const l=f.querySelector('#ml');l.innerHTML=files.length?'':'No files added yet.';files.forEach((x,i)=>{const d=document.createElement('div');d.innerHTML=`<span>${i+1}. ${x.name}</span><button type="button">↑</button><button type="button">↓</button><button type="button">✕</button>`;const b=d.querySelectorAll('button');
+   b[0].onclick=()=>{if(i){[files[i-1],files[i]]=[files[i],files[i-1]];draw()}};b[1].onclick=()=>{if(i<files.length-1){[files[i+1],files[i]]=[files[i],files[i+1]];draw()}};b[2].onclick=()=>{files.splice(i,1);draw()};l.append(d)})};
+  f.querySelector('#mf').onchange=e=>{files.push(...e.target.files);e.target.value='';draw()}});
+ if(!r)return;if(!files.length&&!(S.id&&r.d.cur))return toast('Add at least one PDF.',1);
+ const fd=new FormData();if(S.id&&r.d.cur)fd.append('id',S.id);files.forEach(x=>fd.append('files',x));const j=await call('/api/merge',fd);if(j){S.ops=[];adopt(j);tab('View');zoom('w')}}
+async function toPdfDlg(){const r=await dlg('📥 Create PDF from files','<p>Word, Excel, PowerPoint, text and images. Several files are merged into one PDF.</p><input type="file" name="files" multiple required>','Convert');
+ if(!r)return;const j=await call('/api/to-pdf',r.fd);if(j){S.ops=[];adopt(j);tab('View');zoom('w')}}
+/* ---------- viewer ---------- */
+function load(){if(!S.id)return;S.el=new Image();S.el.onload=()=>{pv.width=S.el.width;pv.height=S.el.height;draw()};S.el.src=`/api/preview/${S.id}/${S.pg}?z=${S.Z.toFixed(3)}&v=${S.ver}`;$('#pi').textContent=`Page ${S.pg} / ${S.pages}  ·  ${Math.round(S.Z*75)}%`}
+function go(n){if(S.id&&n>=1&&n<=S.pages){S.pg=n;load()}}
+function zoom(m){if(!S.id)return;const [W,H]=S.sizes[S.pg-1],vw=$('#vw'),aw=(vw.clientWidth||900)-40,ah=(vw.clientHeight||600)-40;
+ S.Z=m=='act'?96/72:m=='w'?aw/W:m=='p'?Math.min(aw/W,ah/H):Math.max(.3,Math.min(5,S.Z*m));load()}
+const pv=$('#pv'),g=pv.getContext('2d');
+function drawOp(o,Z=S.Z){g.save();g.lineCap=g.lineJoin='round';const c=o.color||'#000';
+ if(o.t=='hl'){g.fillStyle=c;g.globalAlpha=.4;g.fillRect(o.x*Z,o.y*Z,o.w*Z,o.h*Z)}
+ else if(o.t=='ul'||o.t=='st'){g.strokeStyle=c;g.lineWidth=1.5*Z;const y=(o.t=='ul'?o.y+o.h:o.y+o.h/2)*Z;g.beginPath();g.moveTo(o.x*Z,y);g.lineTo((o.x+o.w)*Z,y);g.stroke()}
+ else if(o.t=='ink'){g.strokeStyle=c;g.globalAlpha=o.alpha;g.lineWidth=o.w*Z;g.beginPath();o.pts.forEach((p,i)=>i?g.lineTo(p[0]*Z,p[1]*Z):g.moveTo(p[0]*Z,p[1]*Z));g.stroke()}
+ else if(o.t=='text'){g.fillStyle=c;g.font=`${o.s*Z}px Helvetica,Arial`;o.v.split('\n').forEach((l,i)=>g.fillText(l,o.x*Z,(o.y+i*o.s*1.2)*Z))}
+ else if(o.t=='callout'){g.strokeStyle=c;g.lineWidth=1.2*Z;g.beginPath();g.moveTo((o.bx+o.bw/2)*Z,(o.by+o.bh/2)*Z);g.lineTo(o.x*Z,o.y*Z);g.stroke();g.fillStyle='#fffecc';g.fillRect(o.bx*Z,o.by*Z,o.bw*Z,o.bh*Z);g.strokeRect(o.bx*Z,o.by*Z,o.bw*Z,o.bh*Z);g.fillStyle='#000';g.font=`${o.s*Z}px Helvetica,Arial`;g.fillText(o.v,(o.bx+4)*Z,(o.by+o.s+3)*Z,(o.bw-8)*Z)}
+ else if(o.t=='image'||o.t=='sign'){const i=new Image();i.src=o.v;if(i.complete)g.drawImage(i,o.x*Z,o.y*Z,o.w*Z,o.h*Z);else i.onload=()=>g.drawImage(i,o.x*Z,o.y*Z,o.w*Z,o.h*Z)}
+ else if(o.t=='stamp'){const s=STAMPS.find(x=>x[1]==o.i);g.strokeStyle=g.fillStyle=s[2];g.lineWidth=3*Z;g.strokeRect(o.x*Z,o.y*Z,o.w*Z,o.h*Z);g.font=`bold ${16*Z}px Helvetica,Arial`;g.textAlign='center';g.fillText(s[0].toUpperCase(),(o.x+o.w/2)*Z,(o.y+o.h/2+6)*Z)}
+ else if(o.t=='note'){g.fillStyle='#fde047';g.strokeStyle='#a16207';g.fillRect(o.x*Z,o.y*Z,18*Z,18*Z);g.strokeRect(o.x*Z,o.y*Z,18*Z,18*Z);g.fillStyle='#000';g.font=`${11*Z}px Arial`;g.fillText('≡',(o.x+4)*Z,(o.y+13)*Z)}
+ else if(o.t=='redact'){g.fillStyle='rgba(0,0,0,.75)';g.fillRect(o.x*Z,o.y*Z,o.w*Z,o.h*Z);g.strokeStyle='#ef4444';g.strokeRect(o.x*Z,o.y*Z,o.w*Z,o.h*Z)}
+ else if(o.t=='replace'){const b=o.bbox;g.fillStyle='#fff';g.fillRect(b[0]*Z,b[1]*Z,(b[2]-b[0])*Z,(b[3]-b[1])*Z);g.fillStyle=o.color;g.font=`${o.bold?'bold ':''}${o.s*Z}px Helvetica,Arial`;g.fillText(o.v,o.origin[0]*Z,o.origin[1]*Z)}
+ g.restore()}
+function measDraw(m){const Z=S.Z;g.save();g.strokeStyle='#0ea5e9';g.fillStyle='#0ea5e9';g.lineWidth=2;g.setLineDash([6,4]);g.beginPath();g.moveTo(m.x0*Z,m.y0*Z);g.lineTo(m.x1*Z,m.y1*Z);g.stroke();g.setLineDash([]);
+ const d=Math.hypot(m.x1-m.x0,m.y1-m.y0),f={pt:1,mm:25.4/72,cm:2.54/72,in:1/72}[S.unit],t=(d*f).toFixed(2)+' '+S.unit;g.font='bold 14px Arial';const w=g.measureText(t).width+10,mx=(m.x0+m.x1)/2*Z,my=(m.y0+m.y1)/2*Z;g.fillRect(mx-w/2,my-22,w,20);g.fillStyle='#fff';g.textAlign='center';g.fillText(t,mx,my-7);g.restore()}
+let drag=null;
+function draw(){if(!S.el.complete||!S.el.width)return;g.drawImage(S.el,0,0);S.ops.filter(o=>o.page==S.pg).forEach(o=>drawOp(o));S.meas.filter(m=>m.page==S.pg).forEach(measDraw);
+ const so=S.ops[S.sel];if(so&&so.page==S.pg){const b=bbox(so),Z=S.Z;g.save();g.strokeStyle='#2563eb';g.setLineDash([5,4]);g.lineWidth=2;g.strokeRect(b[0]*Z-3,b[1]*Z-3,(b[2]-b[0])*Z+6,(b[3]-b[1])*Z+6);if(resizable(so)){g.setLineDash([]);g.fillStyle='#2563eb';g.fillRect(b[2]*Z-6,b[3]*Z-6,12,12)}g.restore()}
+ if(!drag)return;const [x0,y0]=drag.p0,[x1,y1]=drag.p1,t=S.tool,Z=S.Z;
+ if(['hl','ul','st','redact'].includes(t))drawOp({t,color:S.col,x:Math.min(x0,x1),y:Math.min(y0,y1),w:Math.abs(x1-x0),h:Math.abs(y1-y0)});
+ else if(t=='pen'||t=='brush')drawOp({t:'ink',pts:drag.pts,w:t=='pen'?S.w:Math.max(10,S.w*4),alpha:t=='pen'?1:.45,color:S.col});
+ else if(t=='line')drawOp({t:'ink',pts:[drag.p0,drag.p1],w:S.w,alpha:1,color:S.col});
+ else if(t=='callout'){g.strokeStyle='#ec4899';g.beginPath();g.moveTo(x0*Z,y0*Z);g.lineTo(x1*Z,y1*Z);g.stroke()}
+ else if(t=='measure')measDraw({x0,y0,x1,y1})}
+const pt=e=>{const r=pv.getBoundingClientRect();return[(e.clientX-r.left)*pv.width/r.width/S.Z,(e.clientY-r.top)*pv.height/r.height/S.Z]};
+function bbox(o){if(o.t=='ink'){const x=o.pts.map(p=>p[0]),y=o.pts.map(p=>p[1]);return[Math.min(...x),Math.min(...y),Math.max(...x),Math.max(...y)]}
+ if(o.t=='text')return[o.x,o.y-o.s,o.x+o.v.length*o.s*.55,o.y+o.s*.3];if(o.t=='callout')return[o.bx,o.by,o.bx+o.bw,o.by+o.bh];if(o.t=='note')return[o.x,o.y,o.x+18,o.y+18];
+ if(o.t=='replace')return o.bbox;return[o.x,o.y,o.x+(o.w||0),o.y+(o.h||0)]}
+function erase(p){const old=S.ops,kept=old.filter(o=>{if(o.page!=S.pg)return true;const b=bbox(o);return!(p[0]>=b[0]-6&&p[0]<=b[2]+6&&p[1]>=b[1]-6&&p[1]<=b[3]+6)});
+ if(kept.length!=old.length){if(!drag.sn){S.hist.push(JSON.parse(JSON.stringify(old)));S.fut=[];drag.sn=1}S.ops=kept;S.sel=null;draw()}}
+pv.onpointerdown=e=>{if(!S.id||!S.tool)return;const p=pt(e);drag={p0:p,p1:p,pts:[p],last:p};pv.setPointerCapture(e.pointerId);
+ if(S.tool=='eraser')erase(p);
+ else if(S.tool=='select'){if(handleHit(p)){drag.mode='resize';const o=S.ops[S.sel];drag.ar=o.h/o.w}else{const i=hitIdx(p);if(i<0){S.sel=null;drag=null;draw();return}S.sel=i;drag.mode='move'}pushHist();draw()}};
+pv.onpointermove=e=>{if(!drag)return;const p=pt(e);drag.p1=p;drag.pts.push(p);
+ if(S.tool=='eraser')erase(p);
+ else if(drag.mode){const o=S.ops[S.sel];if(drag.mode=='move')moveOp(o,p[0]-drag.last[0],p[1]-drag.last[1]);else{o.w=Math.max(12,p[0]-o.x);o.h=['image','sign','stamp'].includes(o.t)?o.w*drag.ar:Math.max(8,p[1]-o.y)}drag.last=p;drag.moved=1}
+ draw()};
+pv.onpointerup=async()=>{if(!drag)return;const d=drag;drag=null;if(d.mode&&!d.moved)S.hist.pop();await finish(d);draw()};
+const add=o=>{snap();S.ops.push(o);toast(`${S.ops.length} pending change(s). Use Save to write them to a file.`)};
+async function finish(d){const t=S.tool,[x0,y0]=d.p0,[x1,y1]=d.p1,page=S.pg,color=S.col,r={x:Math.min(x0,x1),y:Math.min(y0,y1),w:Math.abs(x1-x0),h:Math.abs(y1-y0)};
+ if(['hl','ul','st','redact'].includes(t)){if(r.w>2&&r.h>2)add({t,page,color,...r})}
+ else if(t=='pen'||t=='brush'){add({t:'ink',page,color,w:t=='pen'?S.w:Math.max(10,S.w*4),alpha:t=='pen'?1:.45,pts:d.pts.filter((_,i)=>i%2==0||i==d.pts.length-1).map(p=>[+p[0].toFixed(1),+p[1].toFixed(1)])})}
+ else if(t=='line'){if(r.w+r.h>3)add({t:'ink',page,color,w:S.w,alpha:1,pts:[d.p0,d.p1]})}
+ else if(t=='text'){const a=await dlg('Add text','<textarea name="v" rows="3" cols="34" required></textarea><label>Size <input type="number" name="s" value="14" min="6" max="96" style="width:70px"> Colour <input type="color" name="c" value="#111111"></label>','Add');a&&add({t:'text',page,x:x0,y:y0,v:a.d.v,s:+a.d.s,color:a.d.c})}
+ else if(t=='callout'){if(r.w+r.h<8)return toast('Drag from the point to call out to where the box should sit.');const a=await dlg('Text callout','<textarea name="v" rows="3" cols="30" required></textarea>','Add');if(!a)return;
+  const s=11,bw=170,bh=Math.max(34,Math.ceil(a.d.v.length*s*.55/(bw-8))*s*1.3+12);add({t:'callout',page,x:x0,y:y0,bx:x1-bw/2,by:y1-bh/2,bw,bh,v:a.d.v,s,color:'#ec4899'})}
+ else if(t=='note'){const a=await dlg('Add note','<textarea name="v" rows="4" cols="30" required></textarea>','Add');a&&add({t:'note',page,x:x0,y:y0,v:a.d.v})}
+ else if(t=='image'&&S.img){const w=150;add({t:'image',page,x:x0-w/2,y:y0-w*S.img.h/S.img.w/2,w,h:w*S.img.h/S.img.w,v:S.img.src});placed()}
+ else if(t=='sign'&&S.sig){add({t:'sign',page,x:x0-60,y:y0-22,w:120,h:44,v:S.sig});placed()}
+ else if(t=='stamp'&&S.stamp!=null){add({t:'stamp',page,x:x0-75,y:y0-25,w:150,h:50,i:S.stamp});placed()}
+ else if(t=='edit'){const fd=new FormData();fd.append('id',S.id);fd.append('page',page);fd.append('x',x0);fd.append('y',y0);await commit();const j=await call('/api/textat',fd);if(!j)return;
+  if(!j.found)return toast('No editable text there. Click directly on a word.',1);toast('Ready.');const a=await dlg('Edit content',`<input type="text" name="v" size="38" value="${j.text.replace(/"/g,'&quot;')}" required><small>Edits one line segment at a time using a standard font.</small>`,'Replace');
+  a&&add({t:'replace',page,bbox:j.bbox,origin:j.origin,s:j.size,bold:j.bold,color:j.color,v:a.d.v})}
+ else if(t=='measure'){if(r.w+r.h>2)S.meas.push({page,x0,y0,x1,y1})}}
+/* ---------- undo / redo / select ---------- */
+const clone=()=>JSON.parse(JSON.stringify(S.ops));
+function pushHist(){S.hist.push(clone());if(S.hist.length>80)S.hist.shift();S.fut=[]}
+function snap(){pushHist();S.sel=null}
+async function srvHist(k){const fd=new FormData();fd.append('id',S.id);const j=await call('/api/history/'+k,fd);if(j){S.fut=[];S.hist=[];S.ops=[];S.sel=null;adopt(j,1)}}
+async function undo(){if(!S.id)return toast('Open a PDF first.',1);if(S.hist.length){S.fut.push(clone());S.ops=S.hist.pop();S.sel=null;draw();return toast('Undone.')}await srvHist('undo')}
+async function redo(){if(!S.id)return toast('Open a PDF first.',1);if(S.fut.length){S.hist.push(clone());S.ops=S.fut.pop();S.sel=null;draw();return toast('Redone.')}await srvHist('redo')}
+function delSel(){if(S.sel==null||!S.ops[S.sel])return toast('Nothing selected. Use Select / Move and click an item first.',1);pushHist();S.ops.splice(S.sel,1);S.sel=null;draw();toast('Removed.')}
+const resizable=o=>!!o&&['image','sign','stamp','redact'].includes(o.t);
+function hitIdx(p){for(let i=S.ops.length-1;i>=0;i--){const o=S.ops[i];if(o.page!=S.pg)continue;const b=bbox(o);if(p[0]>=b[0]-6&&p[0]<=b[2]+6&&p[1]>=b[1]-6&&p[1]<=b[3]+6)return i}return -1}
+function handleHit(p){const o=S.ops[S.sel];if(!resizable(o)||o.page!=S.pg)return false;const t=14/S.Z;return Math.abs(p[0]-(o.x+o.w))<t&&Math.abs(p[1]-(o.y+o.h))<t}
+function moveOp(o,dx,dy){if(o.pts)o.pts=o.pts.map(p=>[p[0]+dx,p[1]+dy]);else if(o.bbox){o.bbox=o.bbox.map((v,i)=>v+(i%2?dy:dx));o.origin=[o.origin[0]+dx,o.origin[1]+dy]}else{o.x+=dx;o.y+=dy;if(o.bx!=null){o.bx+=dx;o.by+=dy}}}
+function placed(){S.sel=S.ops.length-1;setTool('select');toast('Placed once. Drag to move, drag the blue corner to resize, press Delete to remove.')}
+addEventListener('keydown',e=>{const t=e.target.tagName;if(t=='INPUT'||t=='TEXTAREA'||t=='SELECT')return;const k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey;
+ if(c&&k=='z'){e.preventDefault();e.shiftKey?redo():undo()}else if(c&&k=='y'){e.preventDefault();redo()}else if((k=='delete'||k=='backspace')&&S.sel!=null){e.preventDefault();delSel()}});
+/* ---------- print ---------- */
+const OPT=(n,o,sel)=>`<select name="${n}">${o.map(x=>`<option value="${x[0]}"${x[0]==sel?' selected':''}>${x[1]}</option>`).join('')}</select>`;
+const SCOPE=(v='all')=>`<label>Pages ${OPT('scope',[['all','All pages'],['current','Current page'],['custom','Custom range']],v)}</label><label>Range <input type="text" name="arg" placeholder="e.g. 1-3,5" size="12"></label>`;
+async function printDlg(pre={}){await commit();
+ const v=Object.assign({scope:'all',subset:'all',per:'1',paper:'original',orient:'auto',scale:'fit',margins:'narrow',color:'color'},pre);
+ const html=`<div class="pgrid">${SCOPE(v.scope)}
+ <label>Print ${OPT('subset',[['all','All in range'],['odd','Odd pages only'],['even','Even pages only']],v.subset)}</label>
+ <label>Pages per sheet ${OPT('per',[['1','1'],['2','2'],['4','4'],['6','6'],['9','9'],['booklet','Booklet']],v.per)}</label>
+ <label>Paper ${OPT('paper',[['original','Original size'],['A4','A4'],['A3','A3'],['A5','A5'],['Letter','Letter'],['Legal','Legal']],v.paper)}</label>
+ <label>Orientation ${OPT('orient',[['auto','Auto'],['portrait','Portrait'],['landscape','Landscape']],v.orient)}</label>
+ <label>Scale ${OPT('scale',[['fit','Fit to paper'],['shrink','Shrink oversized only'],['actual','Actual size'],['custom','Custom %']],v.scale)}</label>
+ <label>Custom % <input type="number" name="pct" value="100" min="10" max="400" style="width:80px"></label>
+ <label>Margins ${OPT('margins',[['none','None'],['narrow','Narrow'],['normal','Normal'],['wide','Wide']],v.margins)}</label>
+ <label>Colour ${OPT('color',[['color','Colour'],['gray','Grayscale'],['bw','Black &amp; white']],v.color)}</label>
+ <label><input type="checkbox" name="reverse" value="1"> Reverse page order</label>
+ <label><input type="checkbox" name="border" value="1"> Draw page borders</label>
+ <label><input type="checkbox" name="numbers" value="1"> Print sheet numbers</label></div>
+ <div class="pvbox"><img id="ppv" alt=""><small id="pinfo">Click Preview to see the first sheet.</small></div>
+ <div class="r2"><button type="button" id="ppreview">👁️ Preview</button><button type="button" id="psave">💾 Save print-ready PDF</button></div>
+ <small>Printer, copies and two-sided printing are chosen in the system print window that opens next. Booklet prints pages in folding order for double-sided printing.</small>`;
+ const r=await dlg('🖨️ Print',html,'Print',f=>{
+  const form=()=>{const fd=new FormData(f);fd.append('id',S.id);fd.append('page',S.pg);return fd};
+  const prev=async()=>{const j=await call('/api/print/prepare',form());if(j){f.querySelector('#ppv').src=`/api/print/${j.tok}/1?dpi=70&t=${Date.now()}`;f.querySelector('#pinfo').textContent=`${j.sheets} sheet(s), ${Math.round(j.w_mm)} x ${Math.round(j.h_mm)} mm`;toast('Ready.')}};
+  f.querySelector('#ppreview').onclick=prev;f.querySelector('#psave').onclick=()=>{const o=Object.fromEntries(new FormData(f));o.page=S.pg;exp('printpdf',o,'print.pdf')};
+  if(pre._pv)setTimeout(prev,50)});
+ r&&doPrint(r.d)}
+async function doPrint(o){await commit();const fd=new FormData();for(const k in o)fd.append(k,o[k]);fd.append('id',S.id);fd.append('page',S.pg);
+ if(/Android/i.test(navigator.userAgent)){toast('Android cannot print from this window, so a print-ready PDF is being saved. Open it and choose Print.');return exp('printpdf',{...o,page:S.pg},'print.pdf')}
+ const j=await call('/api/print/prepare',fd);if(!j)return;toast(`Preparing ${j.sheets} sheet(s)…`);
+ const box=$('#pr');box.innerHTML='';$('#pst').textContent=`@page{size:${j.w_mm}mm ${j.h_mm}mm;margin:0}#pr img{width:${j.w_mm}mm;height:${j.h_mm}mm}`;
+ const ims=[];for(let n=1;n<=j.sheets;n++){const im=new Image();im.src=`/api/print/${j.tok}/${n}?dpi=150`;ims.push(im);box.append(im)}
+ await Promise.all(ims.map(im=>im.decode().catch(()=>{})));toast('Opening the print window. If nothing appears, use Save print-ready PDF.');
+ const done=()=>{box.innerHTML='';removeEventListener('afterprint',done);toast('Ready.')};addEventListener('afterprint',done);window.print()}
+/* ---------- page setup ---------- */
+const MARG=`<label>Top mm <input type="number" name="mt" value="0" min="0" style="width:70px"></label><label>Bottom mm <input type="number" name="mb" value="0" min="0" style="width:70px"></label><label>Left mm <input type="number" name="ml" value="0" min="0" style="width:70px"></label><label>Right mm <input type="number" name="mr" value="0" min="0" style="width:70px"></label>`;
+const SIZE=`<label>Paper size ${OPT('paper',[['keep','Keep current'],['A4','A4'],['A3','A3'],['A5','A5'],['Letter','Letter'],['Legal','Legal'],['custom','Custom (mm)']],'keep')}</label><label>Custom W x H mm <span><input type="number" name="w" value="210" style="width:64px"> x <input type="number" name="h" value="297" style="width:64px"></span></label>`;
+const ORI=`<label>Orientation ${OPT('orient',[['keep','Keep current'],['portrait','Portrait'],['landscape','Landscape']],'keep')}</label>`;
+const SCL=`<label>Content scale ${OPT('scale',[['fit','Fit to page'],['actual','Actual size'],['custom','Custom %']],'fit')}</label><label>Custom % <input type="number" name="pct" value="100" min="10" max="400" style="width:80px"></label>`;
+async function psDlg(m){const T={all:['📐 Page Setup',SIZE+ORI+SCL+MARG],size:['📏 Page Size',SIZE+SCL],orient:['🔄 Orientation',ORI],grow:['⬜ Add Margins',MARG],crop:['✂️ Crop Margins',MARG],scale:['🔍 Scale Pages',SCL]}[m];
+ const r=await dlg(T[0],`<div class="pgrid">${SCOPE('all')}${T[1]}</div>${m=='grow'?'<small>Adds blank margin around the existing content (the page gets bigger).</small>':m=='crop'?'<small>Hides the edges. Use Reset Crop to bring them back.</small>':m=='all'?'<small>Margins here are measured inside the new page size.</small>':''}`,'Apply');
+ if(!r)return;if(m=='crop')mut('crop',r.d);else mut('pagesetup',{...r.d,grow:m=='grow'?1:''})}
+async function bgDlg(){const r=await dlg('🎨 Page Background',`<div class="pgrid">${SCOPE('all')}<label>Colour <input type="color" name="color" value="#fff8dc"></label></div>`,'Apply');r&&mut('background',r.d)}
+async function wmDlg(){const r=await dlg('💧 Watermark',`<div class="pgrid">${SCOPE('all')}<label>Text <input type="text" name="text" value="CONFIDENTIAL" required></label><label>Size <input type="number" name="size" value="60" min="10" max="300" style="width:80px"></label><label>Opacity <input type="number" name="opacity" value="0.25" min="0.05" max="1" step="0.05" style="width:80px"></label><label>Angle <input type="number" name="angle" value="45" min="-90" max="90" style="width:80px"></label><label>Colour <input type="color" name="color" value="#ff0000"></label></div>`,'Add watermark');r&&mut('watermark',r.d)}
+/* ---------- feature dialogs ---------- */
+async function signDlg(){const r=await dlg('✍️ Sign PDF','<canvas id="sg" width="560" height="200"></canvas><div><button type="button" id="sc">Clear</button> Draw your signature, then click on the page to place it.</div>','Use signature',f=>{
+  const c=f.querySelector('#sg'),x=c.getContext('2d');let d=false,ink=false;x.lineWidth=4;x.lineCap='round';x.strokeStyle='#111';
+  const p=e=>{const b=c.getBoundingClientRect();return[(e.clientX-b.left)*c.width/b.width,(e.clientY-b.top)*c.height/b.height]};
+  c.onpointerdown=e=>{d=true;c.setPointerCapture(e.pointerId);x.beginPath();x.moveTo(...p(e))};c.onpointermove=e=>{if(d){x.lineTo(...p(e));x.stroke();ink=true;c.dataset.ink=1}};c.onpointerup=()=>d=false;f.querySelector('#sc').onclick=()=>{x.clearRect(0,0,c.width,c.height);c.dataset.ink=''}});
+ if(r&&r.f.querySelector('#sg').dataset.ink)S.sig=r.f.querySelector('#sg').toDataURL('image/png');if(S.sig){setTool('sign');toast('Click on the page to place your signature.')}}
+async function stampDlg(){const r=await dlg('🏷️ Stamp PDF',`<select name="i">${STAMPS.map(s=>`<option value="${s[1]}">${s[0]}</option>`).join('')}</select>`,'Choose');if(r){S.stamp=+r.d.i;setTool('stamp');toast('Click on the page to place the stamp.')}}
+function imgPick(){$('#iin').click()}$('#iin').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();rd.onload=()=>{const i=new Image();i.onload=()=>{S.img={src:rd.result,w:i.width,h:i.height};setTool('image');toast('Click on the page to place the image.')};i.src=rd.result};rd.readAsDataURL(f)};
+async function protectDlg(){const r=await dlg('🔒 Protect with password','<input type="password" name="user_pw" placeholder="Open password" required><input type="password" name="owner_pw" placeholder="Owner password (optional)"><label><input type="checkbox" name="no_print" value="1"> Block printing</label><label><input type="checkbox" name="no_copy" value="1"> Block copying</label><label><input type="checkbox" name="no_edit" value="1"> Block editing</label>','Protect and save');r&&exp('protect',r.d)}
+async function splitDlg(){const r=await dlg('✂️ Split PDF','<select name="mode"><option value="ranges">Page ranges</option><option value="each">One file per page</option><option value="kw">New file at keyword</option><option value="blank">Split at blank pages</option></select><input type="text" name="arg" placeholder="1-3,4-6 or keyword"><label><input type="checkbox" name="ocr" value="1"> Force OCR</label>','Split to zip');r&&exp('split',r.d)}
+async function hfDlg(){const r=await dlg('📑 Header & Footer','<input type="text" name="header" placeholder="Header text"><input type="text" name="footer" placeholder="Footer text, e.g. Page {page} of {total}" value="Page {page} of {total}"><label>Align <select name="align"><option>center</option><option>left</option><option>right</option></select> Size <input type="number" name="size" value="10" style="width:64px"> <input type="color" name="color" value="#444444"></label>','Apply');r&&mut('headerfooter',r.d)}
+async function confirmDo(t,msg,fn){const r=await dlg(t,`<p>${msg}</p>`,'Yes, do it');r&&fn()}
+const SEL=(n,o)=>`<select name="${n}">${o.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select>`;
+/* ---------- ribbon ---------- */
+const RIB={
+ Home:[['File',[B('📂','Open',pick,0,1),B('💾','Save',()=>exp('save',{},'document.pdf')),B('🧩','Merge',mergeDlg,0,1),B('📥','Create PDF',toPdfDlg,0,1)]]],
+ View:[['Zoom',[B('🔍','Actual Size',()=>zoom('act')),B('↔️','Fit Width',()=>zoom('w')),B('🗒️','Fit Page',()=>zoom('p')),B('➕','Zoom In',()=>zoom(1.25)),B('➖','Zoom Out',()=>zoom(.8))]],
+  ['Navigate',[B('⏮️','First',()=>go(1)),B('◀️','Previous',()=>go(S.pg-1)),B('▶️','Next',()=>go(S.pg+1)),B('⏭️','Last',()=>go(S.pages))]],
+  ['Print',[B('🖨️','Print…',()=>printDlg()),B('⚡','Quick Print',()=>doPrint({})),B('👁️','Print Preview',()=>printDlg({_pv:1})),B('📄','Current Page',()=>printDlg({scope:'current'})),B('1️⃣','Odd Pages',()=>printDlg({subset:'odd'})),B('2️⃣','Even Pages',()=>printDlg({subset:'even'})),B('🔳','4 per Sheet',()=>printDlg({per:'4'})),B('📖','Booklet',()=>printDlg({per:'booklet'})),B('💾','Print-ready PDF',async()=>{await commit();exp('printpdf',{page:S.pg},'print.pdf')})]],
+  ['Page setup',[B('📐','Page Setup…',()=>psDlg('all')),B('📏','Page Size',()=>psDlg('size')),B('🔄','Orientation',()=>psDlg('orient')),B('⬜','Add Margins',()=>psDlg('grow')),B('✂️','Crop Margins',()=>psDlg('crop')),B('↩️','Reset Crop',()=>mut('resetcrop',{scope:'all'})),B('🔍','Scale Pages',()=>psDlg('scale')),B('🎨','Background',bgDlg),B('💧','Watermark',wmDlg),B('#️⃣','Page Numbers',hfDlg)]]],
+ Annotate:[['Text markup',[B('🖍️','Highlight',0,'hl'),B('<u>U</u>','Underline',0,'ul'),B('<s>S</s>','Strikethrough',0,'st')]],
+  ['Draw',[B('📏','Freehand Line',0,'line'),B('🖊️','Pen',0,'pen'),B('🖌️','Brush',0,'brush'),B('🧽','Eraser',0,'eraser')]],
+  ['Style',['<div class="ctl">Colour<input type="color" id="col"></div>','<div class="ctl">Thickness<select id="wid"><option>1</option><option>2</option><option selected>3</option><option>5</option><option>8</option></select></div>']],
+  ['Manage',[B('🗑️','Remove Annotations',()=>confirmDo('Remove annotations','Delete every annotation in this document?',()=>{S.ops=[];mut('strip',{kind:'annots'})})),B('📑','Header & Footer',hfDlg)]]],
+ Edit:[['Content',[B('📝','Add Text',0,'text'),B('✏️','Edit Content',0,'edit'),B('💬','Text Callout',0,'callout'),B('🖼️','Add Image',imgPick),B('🗒️','Add Notes',0,'note')]],
+  ['Sign & Stamp',[B('✍️','Sign PDF',signDlg),B('🏷️','Stamp PDF',stampDlg),B('🚫','Remove Signature',()=>mut('strip',{kind:'sig'})),B('❌','Remove Stamp',()=>mut('strip',{kind:'stamp'}))]],
+  ['Objects',[B('🖱️','Select / Move',0,'select'),B('🗑️','Delete Selected',delSel)]]],
+ Organize:[['Combine',[B('🧩','Merge PDFs',mergeDlg,0,1),B('✂️','Split',splitDlg)]],
+  ['Pages',[B('↺','Rotate Left',()=>mut('rotate',{angle:270})),B('↻','Rotate Right',()=>mut('rotate',{angle:90})),B('🗑️','Delete Page',()=>confirmDo('Delete page',`Delete page ${S.pg}?`,()=>mut('delete'))),B('➕','Insert Blank',()=>mut('blank')),
+   B('📤','Extract Pages',async()=>{const r=await dlg('Extract pages','<input type="text" name="arg" placeholder="e.g. 1-3,5" required>','Extract');r&&exp('extract',r.d)})]]],
+ Convert:[['To PDF',[B('📥','Word / Images to PDF',toPdfDlg,0,1)]],['From PDF',[B('📘','PDF to Word',()=>exp('word',{},'document.docx')),B('🖼️','PDF to Images',()=>exp('images')),B('📄','PDF to Text',()=>exp('text',{ocr:''}))]],
+  ['OCR',[B('🔎','Make Searchable',()=>mut('ocr')),B('🔤','OCR to Text',()=>exp('text',{ocr:1}))]]],
+ Protect:[['Security',[B('🔒','Password Protect',protectDlg),B('🔓','Remove Password',()=>{toast('Open the protected PDF (you will be asked for its password), then click Save.');pick()},0,1)]],['Privacy',[B('⬛','Redact',0,'redact')]]],
+ Tools:[['Optimize',[B('🌐','Optimize for Web',()=>exp('optimize')),B('📉','Reduce Size',async()=>{const r=await dlg('Reduce PDF size',SEL('level',[['low','Low (best quality)'],['medium','Medium'],['high','High (smallest)']]),'Reduce');r&&exp('compress',r.d)})]],
+  ['Transform',[B('🎨','Change Colour',async()=>{const r=await dlg('Change colour',SEL('mode',[['gray','Grayscale'],['bw','Black & white'],['invert','Invert']]),'Apply');r&&mut('color',r.d)}),B('🧱','Flatten PDF',()=>mut('flatten'))]],
+  ['Measure',[B('📐','Measure',async()=>{const r=await dlg('Measure distance',SEL('u',[['mm','Millimetres'],['cm','Centimetres'],['in','Inches'],['pt','Points']]),'Start measuring');if(r){S.unit=r.d.u;setTool('measure');toast('Drag across the page to measure.')}}),B('🧹','Clear Measures',()=>{S.meas=[];draw()})]]]
+};
+let curTab='Home';
+function setTool(t){S.tool=t;document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('on',b.dataset.t==t));pv.style.cursor=t=='select'?'move':t?'crosshair':'default';pv.style.touchAction=t?'none':'auto'}
+function tab(n){curTab=n;S.tool=null;document.documentElement.style.setProperty('--a',ACC[n]);document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.textContent==n));
+ const rib=$('#rib');rib.innerHTML='';for(const[gt,items]of RIB[n]||[]){const gp=document.createElement('div');gp.className='grp';const gb=document.createElement('div');gb.className='gb';
+  items.forEach(it=>{if(typeof it=='string'){gb.insertAdjacentHTML('beforeend',it);return}const b=document.createElement('button');b.className='rb';b.innerHTML=`<i>${it.i}</i>${it.l}`;if(it.t)b.dataset.t=it.t;
+   b.onclick=()=>{if(!S.id&&!it.free)return toast('Open a PDF first.',1);if(it.t){setTool(S.tool==it.t?null:it.t);if(it.t=='measure')return;toast(S.tool?'Tool active: '+it.l:'Ready.')}else it.f()};gb.append(b)});
+  gp.append(gb);gp.insertAdjacentHTML('beforeend',`<div class="gt">${gt}</div>`);rib.append(gp)}
+ const col=$('#col');if(col){col.value=S.col;col.oninput=()=>S.col=col.value;$('#wid').value=S.w;$('#wid').onchange=e=>S.w=+e.target.value}
+ const h=n=='Home';$('#home').hidden=!h;$('#vw').hidden=h;rib.style.display='flex';if(!h&&S.id)setTimeout(()=>{load()},0)}
+Object.keys(ACC).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>tab(n);$('#tabs').append(b)});
+$('#hopen').onclick=pick;$('#hundo').onclick=undo;$('#hredo').onclick=redo;$('#hsave').onclick=()=>S.id?exp('save',{},'document.pdf'):toast('Open a PDF first.',1);
+/* ---------- home dashboard ---------- */
+const go2=(t,f)=>()=>{if(!S.id&&!f)return toast('Open a PDF first.',1);tab(t)};
+const TILES=[['Documents',[['#7c3aed,#a855f7','📂','Open PDF','Open a file to view and edit',pick],['#db2777,#f472b6','🧩','Merge PDFs','Combine several PDFs into one',mergeDlg],['#f97316,#fbbf24','📥','Create PDF','From Word, Excel, images and text',toPdfDlg],['#0ea5e9,#38bdf8','💾','Save','Save your changes as a PDF',()=>S.id?exp('save',{},'document.pdf'):toast('Open a PDF first.',1)]]],
+ ['View & Annotate',[['#0ea5e9,#6366f1','🔍','View','Actual size, fit width, fit page',go2('View')],['#f59e0b,#ef4444','🖍️','Annotate','Highlight, underline, draw, header and footer',go2('Annotate')]]],
+ ['Edit & Sign',[['#ec4899,#8b5cf6','✏️','Edit','Text, callouts, images, notes',go2('Edit')],['#a855f7,#ec4899','✍️','Sign & Stamp','Sign, stamp and remove them',go2('Edit')]]],
+ ['Organize & Convert',[['#10b981,#06b6d4','📑','Organize','Split, rotate, delete, extract pages',go2('Organize')],['#6366f1,#3b82f6','📘','Convert','PDF to Word, images, text, OCR',go2('Convert')]]],
+ ['Protect & Optimize',[['#ef4444,#f97316','🔒','Protect','Passwords, permissions, redaction',go2('Protect')],['#14b8a6,#22c55e','🧰','Tools','Optimize, reduce size, colour, flatten, measure',go2('Tools')]]]];
+$('#home').innerHTML=`<div class="hero"><h2>Everything you need for PDFs</h2><p>View, annotate, edit, sign, convert, protect and optimize. All on your computer.</p><button id="hb1">📂 Open a PDF</button><button id="hb2">🧩 Merge PDFs</button></div>`+
+ TILES.map(([t,x],i)=>`<div class="hg">${t}</div><div class="tiles">${x.map((k,j)=>`<button class="tile" data-k="${i}-${j}" style="background:linear-gradient(135deg,${k[0].split(',')[0]},${k[0].split(',')[1]})"><i>${k[1]}</i><b>${k[2]}</b><small>${k[3]}</small></button>`).join('')}</div>`).join('');
+$('#hb1').onclick=pick;$('#hb2').onclick=mergeDlg;document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{const[i,j]=b.dataset.k.split('-');TILES[i][1][j][4]()});
+tab('Home');
+async function startup(pw){const fd=new FormData();if(pw)fd.append('password',pw);let j;try{j=await (await fetch('/api/startup',{method:'POST',body:fd})).json()}catch(e){return}
+ if(j.needs_password){const r=await dlg('🔒 Password required','<input type="password" name="p" placeholder="Document password" required>','Unlock');return r&&startup(r.d.p)}
+ if(j.id){S.meas=[];adopt(j);tab('View');zoom('w')}}
+startup();
+if('serviceWorker' in navigator&&(location.protocol=='https:'||location.hostname=='localhost'))navigator.serviceWorker.register('/sw.js').catch(()=>{});
+</script></body></html>
