@@ -44,19 +44,19 @@ input[type=text],input[type=password],input[type=number],select,textarea{backgro
 @media (max-width:700px){.pgrid{grid-template-columns:1fr}}
 @media print{html,body{height:auto!important;display:block!important;background:#fff!important}body>*:not(#pr){display:none!important}#pr{display:block!important}#pr img{display:block;break-after:page}}
 
-/* ---- compact layout ---- */
-header{padding:4px 12px;gap:8px}.logo{font-size:16px}#dn{font-size:12px}.credit{font-size:11px;padding:2px 10px}header button{padding:3px 11px;font-size:12px}
-#tabs{padding:4px 10px 0;gap:2px;align-items:flex-end}#tabs button{padding:5px 13px;font-size:12.5px;border-radius:8px 8px 0 0}#tabs #rtog{margin-left:auto;padding:3px 9px;font-size:11px}
-#rib{padding:3px 8px;min-height:0;border-bottom-width:2px}.grp{padding:0 7px}.gt{font-size:9px;padding-top:1px;letter-spacing:.5px}
-.rb{min-width:0;padding:2px 6px;gap:0;font-size:10.5px;border-radius:7px;white-space:nowrap}.rb i{font-size:16px}
-.ctl{font-size:10px;gap:1px}.ctl input,.ctl select{width:72px;padding:1px 4px;font-size:11px}
-#st{padding:2px 12px;font-size:12px;align-items:center;gap:12px}#vw{padding:8px}
-.hero{padding:16px 20px;border-radius:14px}.hero h2{font-size:20px;margin:0 0 2px}.hero p{margin:0 0 10px;font-size:13px}.hero button{padding:7px 16px;font-size:13px}
-#home{padding:14px}.hg{margin:14px 0 6px;font-size:11px}.tiles{grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:8px}.tile{padding:9px 11px;border-radius:11px}.tile i{font-size:20px;margin-bottom:1px}.tile b{font-size:12.5px}.tile small{font-size:10.5px;line-height:1.25;display:block}
-.zc{display:flex;align-items:center;gap:6px}.zc button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:6px;width:22px;height:20px;cursor:pointer;line-height:1;padding:0}
-.zc input[type=text]{width:50px;padding:1px 4px;text-align:center;font-size:12px}.zc input[type=range]{width:130px;accent-color:var(--a)}
-#sb{position:absolute;top:8px;right:22px;z-index:5;display:flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:5px 8px;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:12px}#sb[hidden]{display:none}
-#sb input[type=text]{padding:3px 8px;font-size:12px}#sb label{display:flex;align-items:center;gap:2px;color:var(--mu);cursor:pointer}#sb button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:6px;padding:2px 8px;cursor:pointer}#sn{min-width:70px;color:var(--mu)}
+/* ---- layout: normal text size, slim ribbon ---- */
+header{padding:6px 14px;gap:10px}.logo{font-size:18px}#dn{font-size:13px}.credit{font-size:12px;padding:3px 12px}header button{padding:4px 13px;font-size:13px}
+#tabs{padding:5px 12px 0;gap:3px;align-items:flex-end}#tabs button{padding:6px 15px;font-size:13.5px;border-radius:9px 9px 0 0}#tabs #rtog{margin-left:auto;padding:4px 10px;font-size:12px}
+#rib{padding:3px 10px;min-height:0;border-bottom-width:2px}.grp{padding:0 8px}.gt{font-size:10px;padding-top:0;letter-spacing:.5px;line-height:1.1}
+.rb{min-width:0;padding:2px 8px;gap:0;font-size:12px;border-radius:8px;white-space:nowrap;line-height:1.2}.rb i{font-size:19px;line-height:1.15}
+.ctl{font-size:11px;gap:1px}.ctl input,.ctl select{width:78px;padding:2px 5px;font-size:12px}
+#st{padding:4px 14px;font-size:13px;align-items:center;gap:12px}#vw{padding:10px}
+.hero{padding:20px 24px;border-radius:16px}.hero h2{font-size:24px;margin:0 0 3px}.hero p{margin:0 0 12px;font-size:14px}.hero button{padding:8px 18px;font-size:14px}
+#home{padding:16px}.hg{margin:16px 0 8px;font-size:12px}.tiles{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.tile{padding:11px 13px;border-radius:12px}.tile i{font-size:24px;margin-bottom:2px}.tile b{font-size:14px}.tile small{font-size:12px;line-height:1.3;display:block}
+.zc{display:flex;align-items:center;gap:6px}.zc button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:6px;width:25px;height:23px;font-size:14px;cursor:pointer;line-height:1;padding:0}
+.zc input[type=text]{width:56px;padding:2px 4px;text-align:center;font-size:13px}.zc input[type=range]{width:130px;accent-color:var(--a)}
+#sb{position:absolute;top:8px;right:22px;z-index:5;display:flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 10px;box-shadow:0 6px 20px rgba(0,0,0,.3);font-size:13px}#sb[hidden]{display:none}
+#sb input[type=text]{padding:4px 9px;font-size:13px}#sb label{display:flex;align-items:center;gap:2px;color:var(--mu);cursor:pointer}#sb button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:13px}#sn{min-width:70px;color:var(--mu)}
 @media(max-width:700px){.zc input[type=range]{width:70px}#pi{display:none}#sb{left:8px;right:8px;flex-wrap:wrap}}
 </style><style id="pst"></style></head><body>
 <header><span class="logo">📕 PDF Toolkit</span><span id="dn">No document open</span><span class="credit">Created by Washim Reja. Contact: 7003714487</span><button id="hfind" title="Find (Ctrl+F)">🔍 Find</button><button id="hundo" title="Undo (Ctrl+Z)">↶ Undo</button><button id="hredo" title="Redo (Ctrl+Y)">↷ Redo</button><button id="hopen">Open</button><button id="hsave">Save</button></header>
