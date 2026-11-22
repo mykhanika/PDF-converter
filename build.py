@@ -3,4 +3,4 @@ import os
 import PyInstaller.__main__ as pi
 pi.run(["desktop.py", "--name", "PDFToolkit", "--windowed", "--icon", "app.ico", "--noconfirm", "--clean",
         "--add-data", f"ui.html{os.pathsep}.", "--add-data", f"static{os.pathsep}static",
-        "--collect-all", "pdf2docx", "--collect-all", "docx", "--collect-all", "pymupdf", "--collect-all", "pikepdf"])
+        "--collect-all", "pdf2docx", "--collect-all", "docx", "--collect-all", "pymupdf", "--collect-all", "pikepdf", "--collect-all", "mammoth"])

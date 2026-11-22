@@ -5,3 +5,4 @@ pdf2docx
 pytesseract
 pillow
 gunicorn
+mammoth

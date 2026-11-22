@@ -6,3 +6,4 @@ pytesseract
 pillow
 pywebview
 pyinstaller
+mammoth

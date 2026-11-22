@@ -85,11 +85,44 @@ def searchable(doc):
     new = fitz.open()
     for p in doc: new.insert_pdf(fitz.open("pdf", pytesseract.image_to_pdf_or_hocr(page_img(p), extension="pdf")))
     return new
+CSS_DOC = ("body{font-family:sans-serif;font-size:11pt;line-height:1.35}h1{font-size:20pt}h2{font-size:16pt}h3{font-size:13pt}"
+           "table{border-collapse:collapse}td,th{border:1px solid #888;padding:3px}p{margin:0 0 6pt 0}")
+BLANK_PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")
+
+def builtin_to_pdf(p):
+    """Word (.docx) and text files to PDF with no extra software: text, headings, lists, tables and pictures."""
+    import html as H
+    imgs = {}
+    if p.suffix == ".txt":
+        body = "<pre style='font-family:monospace;font-size:10pt'>" + H.escape(p.read_text(encoding="utf-8", errors="replace")) + "</pre>"
+    else:
+        import mammoth
+        def conv(image):
+            with image.open() as fh: data = fh.read()
+            ext = image.content_type.split("/")[-1].replace("jpeg", "jpg")
+            if ext not in ("png", "jpg", "gif", "bmp"): data, ext = BLANK_PNG, "png"   # unsupported picture types (e.g. EMF)
+            name = f"img{len(imgs)}.{ext}"; imgs[name] = data
+            try: w = Image.open(io.BytesIO(data)).width
+            except Exception: w = 300
+            return {"src": name, "width": str(min(w * 0.75, 480))}
+        with open(p, "rb") as fh: body = mammoth.convert_to_html(fh, convert_image=mammoth.images.img_element(conv)).value
+    arch = fitz.Archive()
+    for n, d in imgs.items(): arch.add(d, n)
+    story = fitz.Story(html=body or "<p></p>", user_css=CSS_DOC, archive=arch)
+    outp = WORK / f"{p.stem}_b.pdf"; w = fitz.DocumentWriter(str(outp)); media = fitz.paper_rect("a4"); where = media + (54, 54, -54, -54)
+    more = 1
+    while more:
+        dev = w.begin_page(media); more, _ = story.place(where); story.draw(dev); w.end_page()
+    w.close(); return outp
+
 def office_to_pdf(p):
     exe = shutil.which("soffice") or shutil.which("libreoffice")
-    if not exe: abort(500, "LibreOffice not found. Install it to convert Word/Excel/PowerPoint.")
-    subprocess.run([exe, "--headless", "--convert-to", "pdf", "--outdir", str(WORK), str(p)], check=True, capture_output=True, timeout=180)
-    return WORK / (p.stem + ".pdf")
+    if exe:   # best fidelity when LibreOffice is installed
+        subprocess.run([exe, "--headless", "--convert-to", "pdf", "--outdir", str(WORK), str(p)], check=True, capture_output=True, timeout=180)
+        return WORK / (p.stem + ".pdf")
+    if p.suffix in (".docx", ".txt"): return builtin_to_pdf(p)
+    abort(500, "This file type needs LibreOffice (free, libreoffice.org) to convert Excel, PowerPoint or old .doc files. Word .docx and text files convert without it.")
+
 def raster(doc, mode="none", dpi=150):
     new = fitz.open()
     for p in doc:

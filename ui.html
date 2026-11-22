@@ -97,7 +97,7 @@ async function mergeDlg(){let files=[];await commit();
   f.querySelector('#mf').onchange=e=>{files.push(...e.target.files);e.target.value='';draw()}});
  if(!r)return;if(!files.length&&!(S.id&&r.d.cur))return toast('Add at least one PDF.',1);
  const fd=new FormData();if(S.id&&r.d.cur)fd.append('id',S.id);files.forEach(x=>fd.append('files',x));const j=await call('/api/merge',fd);if(j){S.ops=[];adopt(j);tab('View');zoom('w')}}
-async function toPdfDlg(){const r=await dlg('📥 Create PDF from files','<p>Word, Excel, PowerPoint, text and images. Several files are merged into one PDF.</p><input type="file" name="files" multiple required>','Convert');
+async function toPdfDlg(){const r=await dlg('📥 Create PDF from files','<p>Word (.docx), text and images convert right away. Excel, PowerPoint and old .doc files need LibreOffice installed. Several files are merged into one PDF.</p><input type="file" name="files" multiple required>','Convert');
  if(!r)return;const j=await call('/api/to-pdf',r.fd);if(j){S.ops=[];adopt(j);tab('View');zoom('w')}}
 /* ---------- viewer ---------- */
 function load(){if(!S.id)return;const im=new Image(),z=S.Z;S.el=im;
