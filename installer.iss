@@ -21,6 +21,7 @@ UninstallDisplayIcon={app}\PDFToolkit.exe
 Name: "desktopicon"; Description: "Create a desktop shortcut"; Flags: unchecked
 
 [Files]
+Source: "pdffile.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\PDFToolkit\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 Source: "tesseract\*"; DestDir: "{app}\tesseract"; Flags: recursesubdirs ignoreversion skipifsourcedoesntexist
 
@@ -30,7 +31,7 @@ Name: "{autodesktop}\PDF Toolkit"; Filename: "{app}\PDFToolkit.exe"; Tasks: desk
 
 [Registry]
 Root: HKA; Subkey: "Software\Classes\PDFToolkit.Document"; ValueType: string; ValueData: "PDF Document"; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\PDFToolkit.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\PDFToolkit.exe,0"
+Root: HKA; Subkey: "Software\Classes\PDFToolkit.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\pdffile.ico"
 Root: HKA; Subkey: "Software\Classes\PDFToolkit.Document\shell\open\command"; ValueType: string; ValueData: """{app}\PDFToolkit.exe"" ""%1"""
 Root: HKA; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: string; ValueName: "PDFToolkit.Document"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\Applications\PDFToolkit.exe\shell\open\command"; ValueType: string; ValueData: """{app}\PDFToolkit.exe"" ""%1"""; Flags: uninsdeletekey
